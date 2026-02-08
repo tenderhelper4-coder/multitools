@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>FORM-T Wage Register (Final)</title>
+
+<!-- jsPDF + AutoTable -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f6f8;
+    padding:15px;
+}
+.container{
+    background:#fff;
+    padding:15px;
+}
+h2{
+    text-align:center;
+    margin-bottom:10px;
+}
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+}
+th,td{
+    border:1px solid #000;
+    padding:4px;
+    text-align:center;
+    font-size:12px;
+}
+th{background:#e9ecef;}
+input,select{
+    width:100%;
+    padding:4px;
+    font-size:12px;
+}
+button{
+    padding:8px 14px;
+    margin-top:10px;
+    cursor:pointer;
+}
+.total{
+    margin-top:10px;
+    text-align:right;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>FORM-T : Combined Muster Roll & Wage Register</h2>
+
+<table>
+<tr>
+<td>Contractor Name</td>
+<td><input id="contractor"></td>
+<td>Work Name</td>
+<td><input id="workname"></td>
+</tr>
+<tr>
+<td>From Date</td>
+<td><input type="date" id="fromdate"></td>
+<td>To Date</td>
+<td><input type="date" id="todate"></td>
+</tr>
+</table>
+
+<table id="wageTable">
+<thead>
+<tr>
+<th>Sl</th>
+<th>Worker Name</th>
+<th>Category</th>
+<th>Attend</th>
+<th>Days</th>
+<th>Rate ₹</th>
+<th>OT ₹</th>
+<th>Gross ₹</th>
+<th>PF 12%</th>
+<th>ESIC 0.75%</th>
+<th>Advance ₹</th>
+<th>Net Pay ₹</th>
+<th>Worker Signature</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<button onclick="addRow()">➕ Add Worker</button>
+
+<div class="total">
+Grand Total (Net Pay): ₹ <span id="grandTotal">0.00</span>
+</div>
+
+<button onclick="downloadPDF()">⬇ Download PDF</button>
+
+</div>
+
+<script>
+let rowNo=0;
+let rates={Skilled:800,Semi:600,Unskilled:500};
+
+function addRow(){
+    rowNo++;
+    let t=document.querySelector("#wageTable tbody");
+    let r=t.insertRow();
+    r.innerHTML=`
+    <td>${rowNo}</td>
+    <td><input></td>
+    <td>
+        <select onchange="setRate(this)">
+            <option>Skilled</option>
+            <option>Semi</option>
+            <option>Unskilled</option>
+        </select>
+    </td>
+    <td>
+        <select onchange="calc(this)">
+            <option value="1">P</option>
+            <option value="0">A</option>
+            <option value="0.5">H</option>
+        </select>
+    </td>
+    <td><input value="1" oninput="calc(this)"></td>
+    <td><input value="800" oninput="calc(this)"></td>
+    <td><input value="0" oninput="calc(this)"></td>
+    <td><input readonly></td>
+    <td><input readonly></td>
+    <td><input readonly></td>
+    <td><input value="0" oninput="calc(this)"></td>
+    <td><input readonly></td>
+    <td style="height:30px"></td>
+    `;
+    calc(r.cells[3].children[0]);
+}
+
+function setRate(e){
+    let r=e.parentElement.parentElement;
+    r.cells[5].children[0].value=rates[e.value];
+    calc(e);
+}
+
+function calc(e){
+    let r=e.parentElement.parentElement;
+    let d=+r.cells[4].children[0].value||0;
+    let rate=+r.cells[5].children[0].value||0;
+    let ot=+r.cells[6].children[0].value||0;
+    let adv=+r.cells[10].children[0].value||0;
+
+    let gross=d*rate+ot;
+    let pf=gross*0.12;
+    let esic=gross*0.0075;
+    let net=gross-pf-esic-adv;
+
+    r.cells[7].children[0].value=gross.toFixed(2);
+    r.cells[8].children[0].value=pf.toFixed(2);
+    r.cells[9].children[0].value=esic.toFixed(2);
+    r.cells[11].children[0].value=net.toFixed(2);
+
+    grand();
+}
+
+function grand(){
+    let t=0;
+    document.querySelectorAll("#wageTable tbody tr").forEach(r=>{
+        t+=+r.cells[11].children[0].value||0;
+    });
+    document.getElementById("grandTotal").innerText=t.toFixed(2);
+}
+
+/* ===== PDF WITH HEADER DETAILS ===== */
+function downloadPDF(){
+    const { jsPDF }=window.jspdf;
+    let pdf=new jsPDF("l","mm","a4");
+
+    let contractor=document.getElementById("contractor").value;
+    let work=document.getElementById("workname").value;
+    let from=document.getElementById("fromdate").value;
+    let to=document.getElementById("todate").value;
+
+    pdf.setFontSize(14);
+    pdf.text("FORM-T : Combined Muster Roll & Wage Register",148,10,{align:"center"});
+
+    pdf.setFontSize(10);
+    pdf.text(`Contractor Name : ${contractor}`,10,18);
+    pdf.text(`Work Name : ${work}`,150,18);
+    pdf.text(`From Date : ${from}`,10,24);
+    pdf.text(`To Date : ${to}`,150,24);
+
+    let head=[["Sl","Worker","Category","Attend","Days","Rate","OT","Gross","PF","ESIC","Advance","Net Pay","Signature"]];
+    let body=[];
+
+    document.querySelectorAll("#wageTable tbody tr").forEach(r=>{
+        body.push([
+            r.cells[0].innerText,
+            r.cells[1].children[0].value,
+            r.cells[2].children[0].value,
+            r.cells[3].children[0].value,
+            r.cells[4].children[0].value,
+            r.cells[5].children[0].value,
+            r.cells[6].children[0].value,
+            r.cells[7].children[0].value,
+            r.cells[8].children[0].value,
+            r.cells[9].children[0].value,
+            r.cells[10].children[0].value,
+            r.cells[11].children[0].value,
+            ""
+        ]);
+    });
+
+    pdf.autoTable({
+        startY:30,
+        head:head,
+        body:body,
+        theme:"grid",
+        styles:{fontSize:8,halign:"center"},
+        margin:{left:5,right:5}
+    });
+
+    let y=pdf.lastAutoTable.finalY+10;
+    pdf.text("Contractor Signature: ____________________",10,y);
+    pdf.text("Date: ____________",230,y);
+
+    pdf.save("FORM_T_Wage_Register_Final.pdf");
+}
+
+addRow();
+</script>
+
+</body>
+</html>
