@@ -48,6 +48,53 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .tool-card { animation: fadeIn 0.5s ease forwards; }
         .tool-counter { text-align: center; margin: 20px 0; font-size: 1.1rem; color: var(--accent-color); }
+        /* Add Tool Button */
+        .add-tool-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--accent-color);
+            color: var(--bg-color);
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 1.8rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px var(--shadow);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .add-tool-btn:hover {
+            background: var(--accent-hover);
+            transform: scale(1.1);
+        }
+        /* Instructions Panel */
+        .instructions-panel {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid var(--accent-color);
+        }
+        .instructions-panel h3 {
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+        .instructions-panel ol {
+            padding-left: 20px;
+        }
+        .instructions-panel li {
+            margin-bottom: 8px;
+        }
+        .instructions-panel code {
+            background: rgba(255,215,0,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--accent-color);
+        }
     </style>
 </head>
 <body>
@@ -57,10 +104,20 @@
                 <i class="fas fa-tools logo-icon"></i>
                 <h1>Multi Tool Hub</h1>
             </div>
-            <p class="tagline">28 professional tools across 4 categories. Now with 4 tools per row for better visibility and access.</p>
+            <p class="tagline">Professional tools with easy management. Click + button to add new tools.</p>
         </div>
     </header>
     <main class="container">
+        <!-- Instructions -->
+        <div class="instructions-panel">
+            <h3>📋 How to Add Tools (3 Easy Steps):</h3>
+            <ol>
+                <li>Click <strong>+ button</strong> (bottom right) to add new tool</li>
+                <li>Create HTML file on GitHub: <code>tools/tool-name.html</code></li>
+                <li>Update the tool's <code>page</code> link in tools array</li>
+            </ol>
+        </div>
+        
         <div class="tool-filter">
             <button class="filter-btn active" data-category="all">All Tools</button>
             <button class="filter-btn" data-category="construction">Construction</button>
@@ -73,48 +130,257 @@
         </div>
         <div class="tools-grid" id="tools-container"></div>
     </main>
+
+    <!-- Add Tool Button -->
+    <button class="add-tool-btn" title="Add New Tool" onclick="addNewTool()">+</button>
+
     <footer>
-        <p>Multi Tool Hub &copy; <span id="current-year">2023</span> | 4 tools per row layout | All tools are free to use</p>
+        <p>Multi Tool Hub &copy; <span id="current-year">2023</span> | Easy Tool Management System</p>
     </footer>
+
     <script>
+        // ============================================
+        // TOOLS DATA ARRAY - Yaha par tools add/edit karein
+        // ============================================
         const tools = [
-            { id: 1, title: "Material Calculator", description: "Calculate construction material quantities.", category: "construction", icon: "fas fa-calculator" },
-            { id: 2, title: "Rate Analysis", description: "Analyze rates for construction items.", category: "construction", icon: "fas fa-chart-line" },
-            { id: 3, title: "Work Duration", description: "Estimate project completion time.", category: "construction", icon: "fas fa-clock" },
-            { id: 4, title: "Tender Checklist", description: "Generate tender documentation checklist.", category: "document", icon: "fas fa-clipboard-check" },
-            { id: 5, title: "Tender Comparison", description: "Compare L1, L2 bids efficiently.", category: "document", icon: "fas fa-balance-scale" },
-            { id: 6, title: "Percentage Calculator", description: "Calculate percentage above/below.", category: "finance", icon: "fas fa-percentage" },
-            { id: 7, title: "Security Deposit", description: "Calculate EMD and Security Deposit.", category: "finance", icon: "fas fa-shield-alt" },
-            { id: 8, title: "Delay Penalty", description: "Calculate Liquidated Damages (LD).", category: "construction", icon: "fas fa-exclamation-triangle" },
-            { id: 9, title: "Running Bill", description: "Calculate RA Bill with GST.", category: "finance", icon: "fas fa-file-invoice-dollar" },
-            { id: 10, title: "TDS Calculator", description: "Calculate Income Tax & GST TDS.", category: "finance", icon: "fas fa-landmark" },
-            { id: 11, title: "Price Escalation", description: "Calculate material price changes.", category: "construction", icon: "fas fa-chart-bar" },
-            { id: 12, title: "Eligibility Checker", description: "Check tender eligibility criteria.", category: "document", icon: "fas fa-user-check" },
-            { id: 13, title: "Covering Letter", description: "Generate tender covering letters.", category: "document", icon: "fas fa-envelope-open-text" },
-            { id: 14, title: "Profit Planner", description: "Plan and analyze profit margins.", category: "finance", icon: "fas fa-chart-pie" },
-            { id: 15, title: "Tender Data Locker", description: "Store tender data offline.", category: "document", icon: "fas fa-database" },
-            { id: 16, title: "wage registers", description: "Generate FORM-T wage registers.", category: "document", icon: "fas fa-file-contract" },
-            { id: 17, title: "GST Calculator", description: "Calculate GST for multiple rates.", category: "finance", icon: "fas fa-receipt" },
-            { id: 18, title: "EMD Calculator", description: "Calculate Earnest Money Deposit.", category: "finance", icon: "fas fa-money-check-alt" },
-            { id: 19, title: "Performance Security", description: "Calculate bank guarantee amounts.", category: "finance", icon: "fas fa-handshake" },
-            { id: 20, title: "Labour Wage", description: "Calculate daily/monthly wages.", category: "construction", icon: "fas fa-hard-hat" },
-            { id: 21, title: "Image Converter", description: "Convert between image formats.", category: "media", icon: "fas fa-file-image" },
-            { id: 22, title: "Image Compressor", description: "Compress images without quality loss.", category: "media", icon: "fas fa-compress-alt" },
-            { id: 23, title: "Image Crop", description: "Crop and resize images.", category: "media", icon: "fas fa-crop-alt" },
-            { id: 24, title: "Video Converter", description: "Convert video formats.", category: "media", icon: "fas fa-file-video" },
-            { id: 25, title: "Age Calculator", description: "Calculate exact age.", category: "document", icon: "fas fa-birthday-cake" },
-            { id: 26, title: "EMI Calculator", description: "Calculate loan installments.", category: "finance", icon: "fas fa-credit-card" },
-            { id: 27, title: "SIP Calculator", description: "Calculate SIP returns.", category: "finance", icon: "fas fa-piggy-bank" },
-            { id: 28, title: "Audio Trim", description: "Trim and edit audio files.", category: "media", icon: "fas fa-music" }
+            { 
+                id: 1, 
+                title: "Material Calculator", 
+                description: "Calculate construction material quantities.", 
+                category: "construction", 
+                icon: "fas fa-calculator",
+                page: "tools/material-calculator.html"  // Yeh file GitHub par banayein
+            },
+            { 
+                id: 2, 
+                title: "Rate Analysis", 
+                description: "Analyze rates for construction items.", 
+                category: "construction", 
+                icon: "fas fa-chart-line",
+                page: "tools/rate-analysis.html"
+            },
+            { 
+                id: 3, 
+                title: "Work Duration", 
+                description: "Estimate project completion time.", 
+                category: "construction", 
+                icon: "fas fa-clock",
+                page: "tools/work-duration.html"
+            },
+            { 
+                id: 4, 
+                title: "Tender Checklist", 
+                description: "Generate tender documentation checklist.", 
+                category: "document", 
+                icon: "fas fa-clipboard-check",
+                page: "tools/tender-checklist.html"
+            },
+            { 
+                id: 5, 
+                title: "Tender Comparison", 
+                description: "Compare L1, L2 bids efficiently.", 
+                category: "document", 
+                icon: "fas fa-balance-scale",
+                page: "tools/tender-comparison.html"
+            },
+            { 
+                id: 6, 
+                title: "Percentage Calculator", 
+                description: "Calculate percentage above/below.", 
+                category: "finance", 
+                icon: "fas fa-percentage",
+                page: "tools/percentage-calculator.html"
+            },
+            { 
+                id: 7, 
+                title: "Security Deposit", 
+                description: "Calculate EMD and Security Deposit.", 
+                category: "finance", 
+                icon: "fas fa-shield-alt",
+                page: "tools/security-deposit.html"
+            },
+            { 
+                id: 8, 
+                title: "Delay Penalty", 
+                description: "Calculate Liquidated Damages (LD).", 
+                category: "construction", 
+                icon: "fas fa-exclamation-triangle",
+                page: "tools/delay-penalty.html"
+            },
+            { 
+                id: 9, 
+                title: "Running Bill", 
+                description: "Calculate RA Bill with GST.", 
+                category: "finance", 
+                icon: "fas fa-file-invoice-dollar",
+                page: "tools/running-bill.html"
+            },
+            { 
+                id: 10, 
+                title: "TDS Calculator", 
+                description: "Calculate Income Tax & GST TDS.", 
+                category: "finance", 
+                icon: "fas fa-landmark",
+                page: "tools/tds-calculator.html"
+            },
+            { 
+                id: 11, 
+                title: "Price Escalation", 
+                description: "Calculate material price changes.", 
+                category: "construction", 
+                icon: "fas fa-chart-bar",
+                page: "tools/price-escalation.html"
+            },
+            { 
+                id: 12, 
+                title: "Eligibility Checker", 
+                description: "Check tender eligibility criteria.", 
+                category: "document", 
+                icon: "fas fa-user-check",
+                page: "tools/eligibility-checker.html"
+            },
+            { 
+                id: 13, 
+                title: "Covering Letter", 
+                description: "Generate tender covering letters.", 
+                category: "document", 
+                icon: "fas fa-envelope-open-text",
+                page: "tools/covering-letter.html"
+            },
+            { 
+                id: 14, 
+                title: "Profit Planner", 
+                description: "Plan and analyze profit margins.", 
+                category: "finance", 
+                icon: "fas fa-chart-pie",
+                page: "tools/profit-planner.html"
+            },
+            { 
+                id: 15, 
+                title: "Tender Data Locker", 
+                description: "Store tender data offline.", 
+                category: "document", 
+                icon: "fas fa-database",
+                page: "tools/tender-data-locker.html"
+            },
+            { 
+                id: 16, 
+                title: "Wage Register", 
+                description: "Generate FORM-T wage registers.", 
+                category: "document", 
+                icon: "fas fa-file-contract",
+                page: "tools/wage-register.html"
+            },
+            { 
+                id: 17, 
+                title: "GST Calculator", 
+                description: "Calculate GST for multiple rates.", 
+                category: "finance", 
+                icon: "fas fa-receipt",
+                page: "tools/gst-calculator.html"
+            },
+            { 
+                id: 18, 
+                title: "EMD Calculator", 
+                description: "Calculate Earnest Money Deposit.", 
+                category: "finance", 
+                icon: "fas fa-money-check-alt",
+                page: "tools/emd-calculator.html"
+            },
+            { 
+                id: 19, 
+                title: "Performance Security", 
+                description: "Calculate bank guarantee amounts.", 
+                category: "finance", 
+                icon: "fas fa-handshake",
+                page: "tools/performance-security.html"
+            },
+            { 
+                id: 20, 
+                title: "Labour Wage", 
+                description: "Calculate daily/monthly wages.", 
+                category: "construction", 
+                icon: "fas fa-hard-hat",
+                page: "tools/labour-wage.html"
+            },
+            { 
+                id: 21, 
+                title: "Image Converter", 
+                description: "Convert between image formats.", 
+                category: "media", 
+                icon: "fas fa-file-image",
+                page: "tools/image-converter.html"
+            },
+            { 
+                id: 22, 
+                title: "Image Compressor", 
+                description: "Compress images without quality loss.", 
+                category: "media", 
+                icon: "fas fa-compress-alt",
+                page: "tools/image-compressor.html"
+            },
+            { 
+                id: 23, 
+                title: "Image Crop", 
+                description: "Crop and resize images.", 
+                category: "media", 
+                icon: "fas fa-crop-alt",
+                page: "tools/image-crop.html"
+            },
+            { 
+                id: 24, 
+                title: "Video Converter", 
+                description: "Convert video formats.", 
+                category: "media", 
+                icon: "fas fa-file-video",
+                page: "tools/video-converter.html"
+            },
+            { 
+                id: 25, 
+                title: "Age Calculator", 
+                description: "Calculate exact age.", 
+                category: "document", 
+                icon: "fas fa-birthday-cake",
+                page: "tools/age-calculator.html"
+            },
+            { 
+                id: 26, 
+                title: "EMI Calculator", 
+                description: "Calculate loan installments.", 
+                category: "finance", 
+                icon: "fas fa-credit-card",
+                page: "tools/emi-calculator.html"
+            },
+            { 
+                id: 27, 
+                title: "SIP Calculator", 
+                description: "Calculate SIP returns.", 
+                category: "finance", 
+                icon: "fas fa-piggy-bank",
+                page: "tools/sip-calculator.html"
+            },
+            { 
+                id: 28, 
+                title: "Audio Trim", 
+                description: "Trim and edit audio files.", 
+                category: "media", 
+                icon: "fas fa-music",
+                page: "tools/audio-trim.html"
+            }
         ];
         
+        // DOM Elements
         const toolsContainer = document.getElementById('tools-container');
         const filterButtons = document.querySelectorAll('.filter-btn');
         const toolCountElement = document.getElementById('tool-count');
         const currentCategoryElement = document.getElementById('current-category');
         
+        // Set current year
         document.getElementById('current-year').textContent = new Date().getFullYear();
         
+        // ============================================
+        // FUNCTION: TOOLS DISPLAY KARE
+        // ============================================
         function renderTools(category = 'all') {
             toolsContainer.innerHTML = '';
             const filteredTools = category === 'all' ? tools : tools.filter(tool => tool.category === category);
@@ -124,28 +390,102 @@
             filteredTools.forEach(tool => {
                 const toolCard = document.createElement('div');
                 toolCard.className = `tool-card category-${tool.category}`;
+                
+                // Agar tool ka page hai to direct link, nahi to alert
+                const buttonAction = tool.page ? 
+                    `window.location.href='${tool.page}'` : 
+                    `alert('Tool page not created yet!\\n\\nCreate file: ${tool.title.toLowerCase().replace(/\\s+/g, '-')}.html')`;
+                
                 toolCard.innerHTML = `
                     <i class="${tool.icon} tool-icon"></i>
                     <h2 class="tool-title">${tool.title}</h2>
                     <p class="tool-desc">${tool.description}</p>
-                    <button class="tool-btn" data-tool-id="${tool.id}">Use Tool</button>
+                    <button class="tool-btn" onclick="${buttonAction}">
+                        ${tool.page ? 'Open Tool' : 'Create Tool Page'}
+                    </button>
                 `;
+                
                 toolsContainer.appendChild(toolCard);
-            });
-            
-            document.querySelectorAll('.tool-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    const toolId = this.getAttribute('data-tool-id');
-                    const tool = tools.find(t => t.id == toolId);
-                    if (tool) {
-                        alert(`Opening: ${tool.title}\n\nCategory: ${tool.category}\n\nThis tool is now loading...`);
-                    }
-                });
             });
         }
         
+        // ============================================
+        // FUNCTION: NEW TOOL ADD KARE
+        // ============================================
+        function addNewTool() {
+            const toolName = prompt("Enter tool name (e.g., BMI Calculator):");
+            if (!toolName) return;
+            
+            const toolDesc = prompt("Enter tool description:");
+            if (!toolDesc) return;
+            
+            const categories = ['construction', 'finance', 'media', 'document'];
+            const category = prompt("Enter category (construction/finance/media/document):", "construction");
+            
+            const iconOptions = [
+                "fas fa-calculator", "fas fa-chart-line", "fas fa-clock", "fas fa-percentage",
+                "fas fa-shield-alt", "fas fa-file-image", "fas fa-music", "fas fa-video",
+                "fas fa-money-bill", "fas fa-chart-pie", "fas fa-database", "fas fa-tools"
+            ];
+            const icon = prompt("Enter icon class (or choose from: calculator, chart-line, clock, percentage):", "fas fa-calculator");
+            
+            // Generate file name
+            const fileName = toolName.toLowerCase().replace(/\s+/g, '-') + '.html';
+            const filePath = `tools/${fileName}`;
+            
+            const newTool = {
+                id: tools.length + 1,
+                title: toolName,
+                description: toolDesc,
+                category: categories.includes(category) ? category : 'construction',
+                icon: icon,
+                page: filePath
+            };
+            
+            tools.push(newTool);
+            renderTools();
+            
+            // Show instructions for creating file
+            alert(`✅ Tool "${toolName}" added!\n\n📁 Now create file on GitHub:\n1. Go to GitHub\n2. Create file: ${filePath}\n3. Add your HTML code\n4. Commit changes`);
+            
+            console.log(`New tool added: ${toolName}`);
+        }
+        
+        // ============================================
+        // FUNCTION: GITHUB FILE CREATION GUIDE
+        // ============================================
+        function showGitHubGuide() {
+            const guideHTML = `
+                <div style="padding: 20px; background: #f0f0f0; color: #333; border-radius: 10px; max-width: 500px; margin: 20px auto;">
+                    <h3>📁 GitHub par File Kaise Banaye:</h3>
+                    <ol>
+                        <li><strong>github.com</strong> par jaayein</li>
+                        <li>Apne repository mein jaayein</li>
+                        <li><strong>"Add file" → "Create new file"</strong> click karein</li>
+                        <li>File name daalein: <code>tools/tool-name.html</code></li>
+                        <li>Code paste karein</li>
+                        <li>Scroll karke <strong>"Commit changes"</strong> click karein</li>
+                    </ol>
+                    <button onclick="this.parentElement.style.display='none'">Close</button>
+                </div>
+            `;
+            
+            const guideDiv = document.createElement('div');
+            guideDiv.innerHTML = guideHTML;
+            guideDiv.style.position = 'fixed';
+            guideDiv.style.top = '50%';
+            guideDiv.style.left = '50%';
+            guideDiv.style.transform = 'translate(-50%, -50%)';
+            guideDiv.style.zIndex = '1001';
+            document.body.appendChild(guideDiv);
+        }
+        
+        // ============================================
+        // INITIALIZE PAGE
+        // ============================================
         renderTools();
         
+        // Filter buttons functionality
         filterButtons.forEach(button => {
             button.addEventListener('click', function() {
                 filterButtons.forEach(btn => btn.classList.remove('active'));
@@ -155,7 +495,30 @@
             });
         });
         
-        console.log('Multi Tool Hub with 4-column layout loaded successfully!');
+        // Add GitHub guide button
+        const githubBtn = document.createElement('button');
+        githubBtn.innerHTML = '?';
+        githubBtn.title = 'GitHub Help';
+        githubBtn.style.cssText = `
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            background: #2B2D42;
+            color: #FFD700;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 1000;
+        `;
+        githubBtn.onclick = showGitHubGuide;
+        document.body.appendChild(githubBtn);
+        
+        console.log('✅ Multi Tool Hub loaded successfully!');
+        console.log('📝 Tools:', tools.length);
+        console.log('🔧 Click + button to add new tools');
     </script>
 </body>
 </html>
