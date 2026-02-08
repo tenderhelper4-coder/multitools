@@ -89,7 +89,7 @@ footer { background: #00000060; padding: 30px; text-align: center; font-size: 14
   <div class="tools">
     <div class="tool">
       <div class="tool-icon" aria-hidden="true">📐</div>
-      <h3>Material Quantity Calculator</h3>
+      <h3>Wage-Register.html</h3>
       <p>Civil work ke liye material quantity estimate</p>
     </div>
     <div class="tool">
@@ -166,7 +166,7 @@ footer { background: #00000060; padding: 30px; text-align: center; font-size: 14
 </section>
 
 <section class="section" id="material-quantity">
-  <h2>Material Quantity Calculator (FREE)</h2>
+  <h2>Wage-Register.html (FREE)</h2>
   <p style="text-align:center;opacity:.9">Calculate Cement, Sand & Aggregate for concrete work</p>
   <div style="max-width:600px;margin:30px auto;background:#ffffff15;padding:25px;border-radius:20px">
     <label for="len">Length (m)</label><input id="len" type="number">
@@ -306,7 +306,7 @@ window.onload = () => {
   if(localStorage.getItem('loggedIn') === 'yes') unlockPro();
 };
 
-// Material Quantity Calculator
+// Wage-Register.html
 function calcQty(){
   const l = +document.getElementById('len').value || 0;
   const b = +document.getElementById('bre').value || 0;
@@ -401,7 +401,7 @@ function downloadRAPDF(){
   <h2>Pricing Plans</h2>
   <p style="text-align:center;opacity:.85">Choose a plan that suits your work needs</p>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:25px;max-width:1000px;margin:40px auto">
-    <div class="tool" style="position:relative"><span class="badge free">FREE</span><h3>Free Plan</h3><ul style="text-align:left;line-height:1.8"><li>✔ Material Quantity Calculator</li><li>✔ Percentage Tools</li><li>✔ Basic Tender Helpers</li><li>✖ Rate Analysis</li><li>✖ PDF Export</li></ul><h3>₹0</h3><button type="button">Start Free</button></div>
+    <div class="tool" style="position:relative"><span class="badge free">FREE</span><h3>Free Plan</h3><ul style="text-align:left;line-height:1.8"><li>✔ Wage-Register.html</li><li>✔ Percentage Tools</li><li>✔ Basic Tender Helpers</li><li>✖ Rate Analysis</li><li>✖ PDF Export</li></ul><h3>₹0</h3><button type="button">Start Free</button></div>
     <div class="tool" style="position:relative;transform:scale(1.05)"><span class="badge pro">PRO</span><h3>Pro Plan</h3><ul style="text-align:left;line-height:1.8"><li>✔ All Free Tools</li><li>✔ Rate Analysis Calculator</li><li>✔ RA Bill / L1-L2 Tools</li><li>✔ PDF / Print</li><li>✔ Priority Support</li></ul><h3>₹299 / Month</h3><button type="button" onclick="openLogin()">Upgrade to Pro</button></div>
     <div class="tool" style="position:relative"><span class="badge life">LIFETIME</span><h3>Lifetime</h3><ul style="text-align:left;line-height:1.8"><li>✔ All Pro Tools</li><li>✔ Lifetime Access</li><li>✔ One-time Payment</li><li>✔ Future Tools Free</li></ul><h3>₹1999 One-Time</h3><button type="button" onclick="openLogin()">Buy Lifetime</button></div>
   </div>
