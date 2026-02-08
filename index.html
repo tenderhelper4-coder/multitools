@@ -3,138 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi Tool Hub</title>
+    <title>Multi Tool Hub - 4 Tools Per Row</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-color: #1E1E2F; --text-color: #EAEAEA; --header-bg: #2B2D42;
+            --accent-color: #FFD700; --accent-hover: #E6C200; --card-bg: #3A3D5B;
+            --card-hover-bg: #FFD700; --card-hover-text: #1E1E2F; --shadow: rgba(255, 215, 0, 0.2);
+            --border-radius: 8px; --transition: all 0.3s ease;
         }
-
-        body {
-            background: #1E1E2F;
-            color: #EAEAEA;
-            text-align: center;
-        }
-
-        .header {
-            background: #2B2D42;
-            padding: 20px;
-            font-size: 24px;
-            font-weight: bold;
-            color: #FFD700;
-        }
-
-        .container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            max-width: 900px;
-            margin: 40px auto;
-        }
-
-        .tool-card {
-            background: #3A3D5B;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            transition: 0.3s;
-            box-shadow: 0 4px 8px rgba(255, 215, 0, 0.2);
-        }
-
-        .tool-card:hover {
-            background: #FFD700;
-            color: #1E1E2F;
-        }
-
-        .tool-card h2 {
-            margin-bottom: 10px;
-        }
-
-        .btn {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 10px 20px;
-            background: #FFD700;
-            color: #1E1E2F;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn:hover {
-            background: #E6C200;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; padding-bottom: 40px; }
+        header { background-color: var(--header-bg); padding: 20px 0; text-align: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); position: sticky; top: 0; z-index: 100; }
+        .header-container { max-width: 1400px; margin: 0 auto; padding: 0 20px; }
+        .logo { display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+        .logo-icon { color: var(--accent-color); font-size: 2.2rem; margin-right: 15px; }
+        h1 { font-size: 2.8rem; color: var(--accent-color); text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); }
+        .tagline { font-size: 1.2rem; opacity: 0.9; max-width: 900px; margin: 0 auto; }
+        .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; }
+        .tool-filter { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 30px 0; }
+        .filter-btn { background-color: var(--card-bg); color: var(--text-color); border: none; padding: 8px 16px; border-radius: 30px; cursor: pointer; font-weight: 500; transition: var(--transition); }
+        .filter-btn:hover { background-color: var(--accent-color); color: var(--bg-color); }
+        .filter-btn.active { background-color: var(--accent-color); color: var(--bg-color); font-weight: 600; }
+        .tools-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .tool-card { background-color: var(--card-bg); border-radius: var(--border-radius); padding: 20px; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); transition: var(--transition); display: flex; flex-direction: column; height: 100%; border: 1px solid rgba(255, 255, 255, 0.05); min-height: 280px; }
+        .tool-card:hover { transform: translateY(-8px); box-shadow: 0 12px 25px var(--shadow); background-color: var(--card-hover-bg); color: var(--card-hover-text); }
+        .tool-card:hover .tool-icon { color: var(--card-hover-text); }
+        .tool-card:hover .tool-btn { background-color: var(--header-bg); color: var(--accent-color); }
+        .tool-icon { font-size: 2rem; color: var(--accent-color); margin-bottom: 15px; transition: var(--transition); text-align: center; }
+        .tool-title { font-size: 1.3rem; margin-bottom: 12px; color: var(--accent-color); transition: var(--transition); text-align: center; }
+        .tool-card:hover .tool-title { color: var(--card-hover-text); }
+        .tool-desc { margin-bottom: 20px; flex-grow: 1; opacity: 0.9; transition: var(--transition); font-size: 0.95rem; text-align: center; }
+        .tool-btn { background-color: var(--accent-color); color: var(--bg-color); border: none; padding: 12px 20px; border-radius: 5px; font-weight: 600; cursor: pointer; transition: var(--transition); width: 100%; font-size: 0.95rem; }
+        .tool-btn:hover { background-color: var(--accent-hover); }
+        footer { text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.7); font-size: 0.9rem; }
+        @media (max-width: 1200px) { .tools-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 992px) { .tools-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .tools-grid { grid-template-columns: 1fr; } h1 { font-size: 2.2rem; } .tagline { font-size: 1.1rem; } .tool-filter { margin: 20px 0; } }
+        @media (max-width: 480px) { .header-container { padding: 0 15px; } h1 { font-size: 1.9rem; } .tool-card { padding: 20px; min-height: 250px; } .tool-title { font-size: 1.3rem; } }
+        .category-finance .tool-icon { color: #4CAF50; }
+        .category-media .tool-icon { color: #FF5722; }
+        .category-construction .tool-icon { color: #2196F3; }
+        .category-document .tool-icon { color: #9C27B0; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .tool-card { animation: fadeIn 0.5s ease forwards; }
+        .tool-counter { text-align: center; margin: 20px 0; font-size: 1.1rem; color: var(--accent-color); }
     </style>
 </head>
 <body>
-    <div class="header">Multi Tool Hub</div>
-    
-    <div class="container">
-        <div class="tool-card">
-            <h2>Image Converter</h2>
-            <p>Convert images to different formats easily.</p>
-            <button class="btn" onclick="goToSection('image-converter')">Go to Tool</button>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-tools logo-icon"></i>
+                <h1>Multi Tool Hub</h1>
+            </div>
+            <p class="tagline">28 professional tools across 4 categories. Now with 4 tools per row for better visibility and access.</p>
         </div>
-
-        <div class="tool-card">
-            <h2>Image Compressor</h2>
-            <p>Compress images without losing quality.</p>
-            <button class="btn" onclick="goToSection('image-compressor')">Go to Tool</button>
+    </header>
+    <main class="container">
+        <div class="tool-filter">
+            <button class="filter-btn active" data-category="all">All Tools</button>
+            <button class="filter-btn" data-category="construction">Construction</button>
+            <button class="filter-btn" data-category="finance">Finance</button>
+            <button class="filter-btn" data-category="media">Media</button>
+            <button class="filter-btn" data-category="document">Document</button>
         </div>
-
-        <div class="tool-card">
-            <h2>Image Crop</h2>
-            <p>Crop images to the desired size and dimensions.</p>
-            <button class="btn" onclick="goToSection('image-crop')">Go to Tool</button>
+        <div class="tool-counter">
+            <span id="tool-count">28</span> Tools Available | <span id="current-category">All Categories</span>
         </div>
-
-        <div class="tool-card">
-            <h2>Video Converter</h2>
-            <p>Convert videos to different formats quickly.</p>
-            <button class="btn" onclick="goToSection('video-converter')">Go to Tool</button>
-        </div>
-
-        <div class="tool-card">
-            <h2>Age Calculator</h2>
-            <p>Find your exact age in years, months, and days.</p>
-            <button class="btn" onclick="goToSection('age-calculator')">Go to Tool</button>
-        </div>
-
-        <div class="tool-card">
-            <h2>EMI Calculator</h2>
-            <p>Calculate your loan EMIs quickly.</p>
-            <button class="btn" onclick="goToSection('emi-calculator')">Go to Tool</button>
-        </div>
-
-        <div class="tool-card">
-            <h2>SIP Calculator</h2>
-            <p>Calculate your SIP returns effortlessly.</p>
-            <button class="btn" onclick="goToSection('sip-calculator')">Go to Tool</button>
-        </div>
-
-        <div class="tool-card">
-            <h2>Audio Trim</h2>
-            <p>Trim audio files to your required length.</p>
-            <button class="btn" onclick="goToSection('audio-trim')">Go to Tool</button>
-        </div>
-    </div>
-
+        <div class="tools-grid" id="tools-container"></div>
+    </main>
+    <footer>
+        <p>Multi Tool Hub &copy; <span id="current-year">2023</span> | 4 tools per row layout | All tools are free to use</p>
+    </footer>
     <script>
-        function goToSection(sectionId) {
-            alert('Redirecting to ' + sectionId + ' (Page under development)');
-            // Replace with actual navigation logic when the pages are ready
+        const tools = [
+            { id: 1, title: "Material Calculator", description: "Calculate construction material quantities.", category: "construction", icon: "fas fa-calculator" },
+            { id: 2, title: "Rate Analysis", description: "Analyze rates for construction items.", category: "construction", icon: "fas fa-chart-line" },
+            { id: 3, title: "Work Duration", description: "Estimate project completion time.", category: "construction", icon: "fas fa-clock" },
+            { id: 4, title: "Tender Checklist", description: "Generate tender documentation checklist.", category: "document", icon: "fas fa-clipboard-check" },
+            { id: 5, title: "Tender Comparison", description: "Compare L1, L2 bids efficiently.", category: "document", icon: "fas fa-balance-scale" },
+            { id: 6, title: "Percentage Calculator", description: "Calculate percentage above/below.", category: "finance", icon: "fas fa-percentage" },
+            { id: 7, title: "Security Deposit", description: "Calculate EMD and Security Deposit.", category: "finance", icon: "fas fa-shield-alt" },
+            { id: 8, title: "Delay Penalty", description: "Calculate Liquidated Damages (LD).", category: "construction", icon: "fas fa-exclamation-triangle" },
+            { id: 9, title: "Running Bill", description: "Calculate RA Bill with GST.", category: "finance", icon: "fas fa-file-invoice-dollar" },
+            { id: 10, title: "TDS Calculator", description: "Calculate Income Tax & GST TDS.", category: "finance", icon: "fas fa-landmark" },
+            { id: 11, title: "Price Escalation", description: "Calculate material price changes.", category: "construction", icon: "fas fa-chart-bar" },
+            { id: 12, title: "Eligibility Checker", description: "Check tender eligibility criteria.", category: "document", icon: "fas fa-user-check" },
+            { id: 13, title: "Covering Letter", description: "Generate tender covering letters.", category: "document", icon: "fas fa-envelope-open-text" },
+            { id: 14, title: "Profit Planner", description: "Plan and analyze profit margins.", category: "finance", icon: "fas fa-chart-pie" },
+            { id: 15, title: "Tender Data Locker", description: "Store tender data offline.", category: "document", icon: "fas fa-database" },
+            { id: 16, title: "Wage Register", description: "Generate FORM-T wage registers.", category: "document", icon: "fas fa-file-contract" },
+            { id: 17, title: "GST Calculator", description: "Calculate GST for multiple rates.", category: "finance", icon: "fas fa-receipt" },
+            { id: 18, title: "EMD Calculator", description: "Calculate Earnest Money Deposit.", category: "finance", icon: "fas fa-money-check-alt" },
+            { id: 19, title: "Performance Security", description: "Calculate bank guarantee amounts.", category: "finance", icon: "fas fa-handshake" },
+            { id: 20, title: "Labour Wage", description: "Calculate daily/monthly wages.", category: "construction", icon: "fas fa-hard-hat" },
+            { id: 21, title: "Image Converter", description: "Convert between image formats.", category: "media", icon: "fas fa-file-image" },
+            { id: 22, title: "Image Compressor", description: "Compress images without quality loss.", category: "media", icon: "fas fa-compress-alt" },
+            { id: 23, title: "Image Crop", description: "Crop and resize images.", category: "media", icon: "fas fa-crop-alt" },
+            { id: 24, title: "Video Converter", description: "Convert video formats.", category: "media", icon: "fas fa-file-video" },
+            { id: 25, title: "Age Calculator", description: "Calculate exact age.", category: "document", icon: "fas fa-birthday-cake" },
+            { id: 26, title: "EMI Calculator", description: "Calculate loan installments.", category: "finance", icon: "fas fa-credit-card" },
+            { id: 27, title: "SIP Calculator", description: "Calculate SIP returns.", category: "finance", icon: "fas fa-piggy-bank" },
+            { id: 28, title: "Audio Trim", description: "Trim and edit audio files.", category: "media", icon: "fas fa-music" }
+        ];
+        
+        const toolsContainer = document.getElementById('tools-container');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const toolCountElement = document.getElementById('tool-count');
+        const currentCategoryElement = document.getElementById('current-category');
+        
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+        
+        function renderTools(category = 'all') {
+            toolsContainer.innerHTML = '';
+            const filteredTools = category === 'all' ? tools : tools.filter(tool => tool.category === category);
+            toolCountElement.textContent = filteredTools.length;
+            currentCategoryElement.textContent = category === 'all' ? 'All Categories' : category.charAt(0).toUpperCase() + category.slice(1);
+            
+            filteredTools.forEach(tool => {
+                const toolCard = document.createElement('div');
+                toolCard.className = `tool-card category-${tool.category}`;
+                toolCard.innerHTML = `
+                    <i class="${tool.icon} tool-icon"></i>
+                    <h2 class="tool-title">${tool.title}</h2>
+                    <p class="tool-desc">${tool.description}</p>
+                    <button class="tool-btn" data-tool-id="${tool.id}">Use Tool</button>
+                `;
+                toolsContainer.appendChild(toolCard);
+            });
+            
+            document.querySelectorAll('.tool-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const toolId = this.getAttribute('data-tool-id');
+                    const tool = tools.find(t => t.id == toolId);
+                    if (tool) {
+                        alert(`Opening: ${tool.title}\n\nCategory: ${tool.category}\n\nThis tool is now loading...`);
+                    }
+                });
+            });
         }
+        
+        renderTools();
+        
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                const category = this.getAttribute('data-category');
+                renderTools(category);
+            });
+        });
+        
+        console.log('Multi Tool Hub with 4-column layout loaded successfully!');
     </script>
 </body>
 </html>
-
-  
