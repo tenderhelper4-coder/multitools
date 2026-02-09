@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Material Quantity Calculator | Cement, Sand, Aggregate</title>
+<meta name="description" content="Advanced Material Quantity Calculator with editable cement density, bag size, cost estimation, PDF export and Pro features. Ideal for contractors and government tenders.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;font-family:Poppins;margin:0;padding:0}
+body{background:#f4f7fb;color:#222}
+header{background:#fff;padding:20px;text-align:center;box-shadow:0 4px 15px rgba(0,0,0,.08)}
+header h1{color:#1f3c88;font-size:32px}
+.container{max-width:1000px;margin:30px auto;background:#fff;padding:30px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.1)}
+label{display:block;margin-top:15px;font-weight:500}
+input,select{width:100%;padding:10px;margin-top:5px;border-radius:8px;border:1px solid #ccc}
+.row{display:flex;gap:10px}
+button{margin-top:20px;background:#1f3c88;color:#fff;border:none;padding:14px;border-radius:30px;font-size:16px;cursor:pointer}
+button:hover{background:#162d63}
+.result{margin-top:25px;padding:20px;background:#f1f4ff;border-radius:12px;display:none}
+.pro{color:#b91c1c;font-size:13px}
+footer{text-align:center;margin:40px 0;color:#666;font-size:14px}
+</style>
+</head>
+<body>
+<header>
+<h1>Material Quantity Calculator</h1>
+<p>Advanced Construction & Tender Tool</p>
+</header>
+<div class="container">
+
+<label>Length</label>
+<div class="row"><input id="len" type="number"><select id="lenUnit"><option value="m">m</option><option value="cm">cm</option><option value="mm">mm</option><option value="ft">ft</option></select></div>
+
+<label>Breadth</label>
+<div class="row"><input id="bre" type="number"><select id="breUnit"><option value="m">m</option><option value="cm">cm</option><option value="mm">mm</option><option value="ft">ft</option></select></div>
+
+<label>Height / Thickness</label>
+<div class="row"><input id="hei" type="number"><select id="heiUnit"><option value="m">m</option><option value="cm">cm</option><option value="mm">mm</option><option value="ft">ft</option></select></div>
+
+<label>Cement Density (kg/m³)</label>
+<input id="density" type="number" value="1440" min="1400" max="1450">
+
+<label>Cement Bag Size</label>
+<select id="bagSize"><option value="50">50 Kg</option><option value="40">40 Kg <span class='pro'>(PRO)</span></option></select>
+
+<label>Concrete Mix Ratio</label>
+<select id="ratio" onchange="toggleCustom()"><option value="1:2:4">1:2:4</option><option value="1:1.5:3">1:1.5:3</option><option value="custom">Custom <span class='pro'>(PRO)</span></option></select>
+
+<div id="customBox" class="row" style="display:none"><input id="c1" placeholder="Cement"><input id="c2" placeholder="Sand"><input id="c3" placeholder="Aggregate"></div>
+
+<h3 style="margin-top:20px">Material Rates (₹)</h3>
+<label>Cement per Bag</label><input id="rateC" type="number">
+<label>Sand per m³</label><input id="rateS" type="number">
+<label>Aggregate per m³</label><input id="rateA" type="number">
+
+<button onclick="calc()">Calculate</button>
+<button onclick="window.print()" style="margin-left:10px">Print / Save PDF</button>
+
+<div class="result" id="res"></div>
+</div>
+<footer>© 2026 TenderHelper.in</footer>
+<script>
+function toM(v,u){if(u==='cm')return v/100;if(u==='mm')return v/1000;if(u==='ft')return v*0.3048;return v}
+function toggleCustom(){customBox.style.display = ratio.value==='custom'?'flex':'none'}
+function calc(){
+let l=toM(+len.value,lenUnit.value),b=toM(+bre.value,breUnit.value),h=toM(+hei.value,heiUnit.value);
+if(l<=0||b<=0||h<=0){alert('Invalid dimensions');return}
+let r;
+if(ratio.value==='custom'){alert('Custom ratio is PRO feature');return}else r=ratio.value.split(':').map(Number);
+let wet=l*b*h,dry=wet*1.54,total=r[0]+r[1]+r[2];
+let dens=+density.value;
+let cementKg=dry*(r[0]/total)*dens;
+let bags=cementKg/(+bagSize.value);
+let sandVol=dry*(r[1]/total),aggVol=dry*(r[2]/total);
+let costC=bags*(+rateC.value||0),costS=sandVol*(+rateS.value||0),costA=aggVol*(+rateA.value||0);
+res.innerHTML=`<b>Concrete Volume:</b> ${wet.toFixed(3)} m³<br>
+<b>Cement:</b> ${bags.toFixed(1)} Bags (${cementKg.toFixed(0)} kg)<br>
+<b>Sand:</b> ${sandVol.toFixed(3)} m³<br>
+<b>Aggregate:</b> ${aggVol.toFixed(3)} m³<br><hr>
+<b>Total Cost:</b> ₹${(costC+costS+costA).toFixed(2)}`;
+res.style.display='block';
+}
+</script>
+</body>
+</html>
