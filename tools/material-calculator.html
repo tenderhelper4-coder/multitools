@@ -28,6 +28,13 @@ footer{text-align:center;margin:40px 0;color:#666;font-size:14px}
 <p>Advanced Construction & Tender Tool</p>
 </header>
 <div class="container">
+<section class="tool-desc" style="margin-bottom:25px;background:#f8fafc;padding:20px;border-radius:14px;line-height:1.7">
+<h2 style="color:#1f3c88;margin-bottom:10px">Tool Description</h2>
+<p><strong>Material Quantity Calculator</strong> is a practical and advanced construction planning tool designed for contractors, engineers, and government tender applicants. This tool helps you calculate the exact quantity of <strong>cement, sand, and aggregate</strong> required for any type of concrete work with high accuracy.</p>
+<p>The calculator supports multiple units for length, breadth, and thickness including meter, feet, centimeter, and millimeter, allowing direct site measurements without manual conversion. Users can also select cement density, bag size, and enter material rates to estimate the total project cost. Its simple interface and PDF export feature make it a reliable solution for tender estimation and project planning.</p>
+</section>
+
+<!-- TOOL UI START -->
 
 <label>Length</label>
 <div class="row"><input id="len" type="number"><select id="lenUnit"><option value="m">m</option><option value="cm">cm</option><option value="mm">mm</option><option value="ft">ft</option></select></div>
@@ -58,6 +65,23 @@ footer{text-align:center;margin:40px 0;color:#666;font-size:14px}
 <button onclick="window.print()" style="margin-left:10px">Print / Save PDF</button>
 
 <div class="result" id="res"></div>
+
+<!-- FAQ SECTION -->
+<section class="faq" style="margin-top:40px;background:#ffffff;padding:20px;border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.08)">
+<h2 style="color:#1f3c88;margin-bottom:15px">Frequently Asked Questions (FAQ)</h2>
+
+<p><strong>Q1. Which concrete mix ratios are supported?</strong><br>
+The tool supports standard concrete mix ratios such as 1:1.5:3 and 1:2:4. Custom mix ratios are available as a Pro feature.</p>
+
+<p><strong>Q2. Can I use feet or millimeter for measurements?</strong><br>
+Yes, you can enter length, breadth, and thickness in meters, feet, centimeters, or millimeters. The tool automatically converts all units internally.</p>
+
+<p><strong>Q3. How is cement quantity calculated?</strong><br>
+Cement quantity is calculated based on dry concrete volume, selected mix ratio, and cement density. The final result is shown in number of cement bags.</p>
+
+<p><strong>Q4. Can I download the result as a PDF?</strong><br>
+Yes, you can use the Print / Save PDF option to download or print the calculated result for records or tender submission.</p>
+</section>
 </div>
 <footer>© 2026 TenderHelper.in</footer>
 <script>
