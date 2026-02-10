@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tender Comparison Tool – Govt Format</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Advanced tender comparison tool with GST, technical & financial bid, L1 recommendation, dashboard and printable govt format.">
+
+<!-- ================= SEO JSON-LD ================= -->
+<script type="application/ld+json">
+{
+ "@context":"https://schema.org",
+ "@type":"SoftwareApplication",
+ "name":"Tender Comparison Tool",
+ "applicationCategory":"BusinessApplication",
+ "operatingSystem":"All",
+ "description":"Department-wise tender comparison with GST, technical and financial bid evaluation and L1 recommendation."
+}
+</script>
+
+<script type="application/ld+json">
+{
+ "@context":"https://schema.org",
+ "@type":"FAQPage",
+ "mainEntity":[{
+   "@type":"Question",
+   "name":"How is L1 calculated?",
+   "acceptedAnswer":{"@type":"Answer","text":"L1 is the lowest financial bid among technically qualified bidders including GST."}
+ }]
+}
+</script>
+
+<style>
+body{font-family:Arial;background:#eef1f4;margin:0}
+.container{max-width:1200px;margin:auto;background:#fff;padding:20px}
+h1,h2,h3{color:#1a237e}
+p{color:#444}
+input,select{padding:6px;width:100%}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border:1px solid #999;padding:8px;text-align:center}
+th{background:#e3e6f5}
+button{background:#1a237e;color:#fff;border:none;padding:8px 12px;margin:4px;cursor:pointer;border-radius:4px}
+button:hover{background:#0d47a1}
+.l1{background:#c8e6c9;font-weight:bold}
+.note{background:#f1f8e9;border-left:4px solid #2e7d32;padding:10px;margin-top:10px}
+.section{margin-top:25px}
+.dashboard{background:#f7f7f7;padding:10px;border:1px solid #ccc}
+.print-only{display:none}
+@media print{
+  .no-print{display:none}
+  .print-only{display:block}
+  body{background:#fff}
+}
+</style>
+</head>
+
+<body>
+<div class="container" id="app">
+
+<!-- ================= DASHBOARD ================= -->
+<div class="dashboard no-print">
+<h2>📂 Multi-Tender Dashboard</h2>
+<input id="tenderName" placeholder="Tender Name / Ref No">
+<button onclick="saveTender()">💾 Save Tender</button>
+<button onclick="loadTender()">📂 Load Tender</button>
+<select id="savedList"></select>
+</div>
+
+<!-- ================= REPORT HEADER ================= -->
+<div class="print-only">
+<h2 style="text-align:center">GOVERNMENT TENDER COMPARATIVE STATEMENT</h2>
+<hr>
+</div>
+
+<h1>Tender Comparison Tool</h1>
+
+<!-- ================= BASIC DETAILS ================= -->
+<div class="section">
+<h2>Department</h2>
+<select id="department">
+<option>PWD</option><option>CPWD</option><option>Railways</option>
+<option>IOCL</option><option>UPCL</option><option>UPPCL</option><option>Custom</option>
+</select>
+
+<h3>GST</h3>
+<select id="gstType">
+<option value="exclusive">GST Exclusive</option>
+<option value="inclusive">GST Inclusive</option>
+</select>
+<input id="gstRate" type="number" value="18">
+</div>
+
+<!-- ================= TECHNICAL BID ================= -->
+<div class="section">
+<h2>Technical Bid Evaluation</h2>
+<table>
+<tr><th>Bidder</th><th>Status</th></tr>
+<tbody id="techBody">
+<tr>
+<td><input></td>
+<td><select><option>Qualified</option><option>Not Qualified</option></select></td>
+</tr>
+</tbody>
+</table>
+<button class="no-print" onclick="addTech()">Add Bidder</button>
+</div>
+
+<!-- ================= FINANCIAL BID ================= -->
+<div class="section">
+<h2>Financial Bid Comparison</h2>
+<table id="finTable">
+<tr>
+<th>Bidder</th>
+<th>Quoted Amount (₹)</th>
+<th>Total Amount (₹)</th>
+<th>Result</th>
+</tr>
+<tbody>
+<tr>
+<td><input></td>
+<td><input type="number"></td>
+<td>-</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+
+<button class="no-print" onclick="addFin()">Add Financial Bid</button>
+<button class="no-print" onclick="compare()">Compare</button>
+<button class="no-print" onclick="exportExcel()">Export Excel</button>
+<button class="no-print" onclick="window.print()">Print Govt Format</button>
+</div>
+
+<div id="l1Note"></div>
+
+<!-- ================= FAQ ================= -->
+<div class="section">
+<h2>FAQ</h2>
+<p><b>Q.</b> Is this govt-format printable?<br>Yes, print mode hides buttons and shows official layout.</p>
+<p><b>Q.</b> Are tenders saved online?<br>No, data is saved locally in browser (safe).</p>
+</div>
+
+</div>
+
+<script>
+function addTech(){
+techBody.insertRow().innerHTML=
+`<td><input></td><td><select><option>Qualified</option><option>Not Qualified</option></select></td>`;
+}
+function addFin(){
+finTable.querySelector("tbody").insertRow().innerHTML=
+`<td><input></td><td><input type="number"></td><td>-</td><td>-</td>`;
+}
+
+function compare(){
+let gst=parseFloat(gstRate.value)||0;
+let type=gstType.value;
+let qualified={};
+[...techBody.rows].forEach(r=>{
+ if(r.cells[0].children[0].value && r.cells[1].children[0].value=="Qualified")
+ qualified[r.cells[0].children[0].value]=true;
+});
+let totals=[];
+[...finTable.tBodies[0].rows].forEach(r=>{
+let name=r.cells[0].children[0].value;
+let base=parseFloat(r.cells[1].children[0].value);
+if(!qualified[name]||isNaN(base)){r.cells[3].innerText="Not Eligible";return;}
+let total=type=="exclusive"?base+(base*gst/100):base;
+r.cells[2].innerText=total.toFixed(2);
+totals.push(total);
+});
+let l1=Math.min(...totals);
+[...finTable.tBodies[0].rows].forEach(r=>{
+let t=parseFloat(r.cells[2].innerText);
+r.classList.remove("l1");
+if(!isNaN(t)){
+ if(t===l1){r.classList.add("l1");r.cells[3].innerText="L1";}
+ else r.cells[3].innerText=((t-l1)/l1*100).toFixed(2)+"%";
+}
+});
+l1Note.innerHTML=`<div class="note"><b>Recommendation:</b> L1 bidder recommended for <b>${department.value}</b>.</div>`;
+}
+
+function exportExcel(){
+let blob=new Blob([app.outerHTML],{type:"application/vnd.ms-excel"});
+let a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="Tender_Comparison.xls";
+a.click();
+}
+
+/* ===== SAVE / LOAD ===== */
+function saveTender(){
+if(!tenderName.value)return alert("Enter tender name");
+localStorage.setItem(tenderName.value,app.innerHTML);
+refreshList();
+}
+function loadTender(){
+let k=savedList.value;
+if(k)app.innerHTML=localStorage.getItem(k);
+}
+function refreshList(){
+savedList.innerHTML="";
+for(let k in localStorage){
+let o=document.createElement("option");o.text=k;savedList.add(o);
+}
+}
+refreshList();
+</script>
+
+</body>
+</html>
