@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tender Document Checklist Generator | Tender Helper</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="description" content="Generate department-wise tender document checklist for PWD, CPWD, Railways. Works, Supply & Consultancy tenders supported with PDF export.">
+
+<!-- SEO SCHEMA JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Tender Document Checklist Generator",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "INR"
+  },
+  "description": "Department-wise tender checklist generator for Works, Supply & Consultancy tenders with PDF export."
+}
+</script>
+
+<style>
+body{font-family:Arial;background:#f4f6f8;margin:0}
+.container{max-width:1100px;margin:auto;padding:20px}
+.box{background:#fff;padding:25px;border-radius:10px;margin-bottom:25px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+h1,h2,h3{color:#0a3d62}
+select,input,button{padding:10px;margin:5px 0}
+button{background:#0a3d62;color:#fff;border:none;border-radius:6px;cursor:pointer}
+button:hover{background:#065a82}
+label{display:block;margin:6px 0}
+.progress{background:#ddd;height:18px;border-radius:10px}
+.progress-bar{height:100%;width:0;background:#27ae60}
+footer{text-align:center;font-size:14px;color:#777}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<!-- DESCRIPTION -->
+<div class="box">
+<h1>📄 Tender Document Checklist Generator</h1>
+<p>
+Generate <b>auto-selected tender document checklists</b> based on
+<b>Tender Type</b> and <b>Department</b>.
+Designed for PWD, CPWD, Railways & Govt e-Tendering.
+</p>
+</div>
+
+<!-- SELECTORS -->
+<div class="box">
+<h2>⚙️ Select Tender Details</h2>
+
+<select id="tenderType">
+<option value="">Select Tender Type</option>
+<option value="works">Works Tender</option>
+<option value="supply">Supply Tender</option>
+<option value="consultancy">Consultancy Tender</option>
+</select>
+
+<select id="department">
+<option value="">Select Department</option>
+<option value="pwd">PWD</option>
+<option value="cpwd">CPWD</option>
+<option value="railways">Railways</option>
+</select>
+
+<button onclick="generateChecklist()">Generate Checklist</button>
+</div>
+
+<!-- CHECKLIST -->
+<div class="box">
+<h2>📝 Checklist</h2>
+<div class="progress"><div class="progress-bar" id="progress"></div></div>
+<div id="checklist"></div>
+
+<br>
+<button onclick="exportPDF()">📥 Export PDF</button>
+<button onclick="window.print()">🖨️ Print</button>
+</div>
+
+<!-- FAQ -->
+<div class="box">
+<h2>❓ FAQ</h2>
+<h3>Is this checklist department specific?</h3>
+<p>Yes, documents change automatically for PWD, CPWD and Railways.</p>
+
+<h3>Is it valid for Indian Govt tenders?</h3>
+<p>Yes. Designed as per common Indian e-Tender requirements.</p>
+</div>
+
+<footer>
+© 2026 Tender Helper – Government Tendering Made Simple, Smart & Error-Free
+</footer>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+const data = {
+works:{
+pwd:["NIT","Technical Bid","BOQ","Work Experience","Solvency","Affidavit"],
+cpwd:["NIT","Form 7/8","BOQ","GST","PAN","EPF","ESIC"],
+railways:["Tender Form","Completion Cert.","Machinery","Safety Affidavit"]
+},
+supply:{
+pwd:["Supply Schedule","GST","PAN","OEM Authorization"],
+cpwd:["Technical Specs","Compliance Sheet","Turnover Cert."],
+railways:["IRS Conditions","Vendor Registration","Warranty"]
+},
+consultancy:{
+pwd:["Profile","Similar Works","CVs","Methodology"],
+cpwd:["Form A","Key Personnel","Financial Proposal"],
+railways:["Consultancy Bid","Experience","Undertaking"]
+}
+};
+
+function generateChecklist(){
+const t=document.getElementById("tenderType").value;
+const d=document.getElementById("department").value;
+const area=document.getElementById("checklist");
+area.innerHTML="";
+if(!t||!d)return alert("Select both fields");
+
+data[t][d].forEach(item=>{
+area.innerHTML+=`<label><input type="checkbox" class="doc" onchange="updateProgress()"> ${item}</label>`;
+});
+updateProgress();
+}
+
+function updateProgress(){
+const total=document.querySelectorAll(".doc").length;
+const checked=document.querySelectorAll(".doc:checked").length;
+document.getElementById("progress").style.width=(checked/total*100||0)+"%";
+}
+
+function exportPDF(){
+const {jsPDF}=window.jspdf;
+const pdf=new jsPDF();
+pdf.text("Tender Document Checklist",10,10);
+let y=20;
+document.querySelectorAll(".doc:checked").forEach(d=>{
+pdf.text("✔ "+d.parentElement.innerText,10,y); y+=8;
+});
+pdf.save("Tender_Checklist.pdf");
+}
+</script>
+
+</body>
+</html>
