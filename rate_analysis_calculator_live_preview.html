@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rate Analysis Calculator | Tender Helper</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f6f8;
+    margin:0;
+    padding:0;
+}
+.container{
+    max-width:1100px;
+    margin:auto;
+    padding:20px;
+}
+h1,h2,h3{
+    color:#1e293b;
+}
+p{
+    color:#475569;
+}
+.card{
+    background:#fff;
+    padding:20px;
+    margin-bottom:20px;
+    border-radius:8px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+table th, table td{
+    border:1px solid #ddd;
+    padding:8px;
+    text-align:center;
+}
+table th{
+    background:#0f172a;
+    color:#fff;
+}
+input{
+    width:100%;
+    padding:6px;
+}
+button{
+    padding:10px 15px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+}
+.add-btn{
+    background:#2563eb;
+    color:#fff;
+}
+.pdf-btn{
+    background:#16a34a;
+    color:#fff;
+}
+.remove-btn{
+    background:#dc2626;
+    color:#fff;
+}
+.total-box{
+    font-size:18px;
+    font-weight:bold;
+    color:#0f172a;
+}
+.faq h3{
+    margin-bottom:5px;
+}
+footer{
+    text-align:center;
+    padding:15px;
+    color:#64748b;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card">
+<h1>Rate Analysis Calculator</h1>
+<p>
+This Rate Analysis Calculator helps contractors, engineers, and tender applicants
+to accurately analyze item-wise rates by including <b>material cost, labor cost,
+overhead expenses, and profit margin</b>.
+</p>
+</div>
+
+<div class="card">
+<h2>Rate Analysis Tool</h2>
+
+<table id="rateTable">
+<thead>
+<tr>
+<th>Item Name</th>
+<th>Material Cost (₹)</th>
+<th>Labor Cost (₹)</th>
+<th>Overhead (₹)</th>
+<th>Profit (₹)</th>
+<th>Total (₹)</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+<br>
+<button class="add-btn" onclick="addRow()">➕ Add Item</button>
+<button class="pdf-btn" onclick="exportPDF()">📄 Export PDF</button>
+
+<p class="total-box" id="grandTotal">Grand Total: ₹0.00</p>
+</div>
+
+<div class="card faq">
+<h2>Frequently Asked Questions (FAQ)</h2>
+<h3>What is Rate Analysis?</h3>
+<p>Rate analysis is the process of calculating the unit cost of an item.</p>
+<h3>Who can use this calculator?</h3>
+<p>Contractors, engineers, consultants, and tender applicants.</p>
+<h3>Can I add multiple items?</h3>
+<p>Yes, unlimited items can be added.</p>
+<h3>Does it support PDF export?</h3>
+<p>Yes, professional PDF export is available.</p>
+</div>
+
+</div>
+
+<footer>
+© 2026 Tender Helper | Government Tendering Made Simple, Smart & Error-Free
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+function addRow(){
+    const tbody = document.querySelector("#rateTable tbody");
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+        <td><input type="text" placeholder="Item Name"></td>
+        <td><input type="number" value="0" oninput="calculate()"></td>
+        <td><input type="number" value="0" oninput="calculate()"></td>
+        <td><input type="number" value="0" oninput="calculate()"></td>
+        <td><input type="number" value="0" oninput="calculate()"></td>
+        <td class="itemTotal">0.00</td>
+        <td><button class="remove-btn" onclick="removeRow(this)">❌</button></td>
+    `;
+    tbody.appendChild(row);
+}
+
+function removeRow(btn){
+    btn.closest("tr").remove();
+    calculate();
+}
+
+function calculate(){
+    let grandTotal = 0;
+    document.querySelectorAll("#rateTable tbody tr").forEach(row=>{
+        const inputs = row.querySelectorAll("input[type='number']");
+        let total = 0;
+        inputs.forEach(input => total += Number(input.value || 0));
+        row.querySelector(".itemTotal").innerText = total.toFixed(2);
+        grandTotal += total;
+    });
+    document.getElementById("grandTotal").innerText = "Grand Total: ₹" + grandTotal.toFixed(2);
+}
+
+function exportPDF(){
+    const element = document.querySelector(".container");
+    html2pdf().from(element).save('Rate-Analysis.pdf');
+}
+
+addRow();
+</script>
+
+</body>
+</html>
