@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Official Government Quotation</title>
+<style>
+body{font-family:"Times New Roman",serif;background:#f2f2f2;margin:0;padding:20px}
+.container{max-width:1000px;margin:auto;background:#fff;padding:30px;border:2px solid #000}
+h2,h3,p{margin:4px 0}
+.center{text-align:center}
+.right{text-align:right}
+.bold{font-weight:bold}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border:1px solid #000;padding:6px;font-size:14px}
+th{background:#eaeaea}
+input,textarea,select{width:100%;border:none;font-family:inherit;font-size:14px}
+.summary{margin-top:10px;width:50%;float:right}
+.summary td{border:1px solid #000}
+.clear{clear:both}
+.signature-section{margin-top:60px;display:flex;justify-content:space-between}
+.sign-box{width:250px;text-align:center}
+.stamp-box{width:250px;height:90px;border:1px solid #000;margin:auto}
+button{margin-top:10px;padding:6px 12px}
+@media print{
+button{display:none}
+body{background:#fff;padding:0}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="center">
+<h2><input id="companyName" placeholder="Company Name" style="font-size:22px;font-weight:bold;text-align:center;"></h2>
+<p><textarea id="companyAddress" placeholder="Company Address" style="text-align:center;height:50px;"></textarea></p>
+<p class="bold">QUOTATION</p>
+</div>
+
+<table style="margin-top:10px;">
+<tr>
+<td width="50%"><span class="bold">Quotation No:</span> <input id="quotNo"></td>
+<td width="50%"><span class="bold">Date:</span> <input type="date" id="qDate"></td>
+</tr>
+<tr>
+<td><span class="bold">From:</span><br><textarea id="fromCompany" style="height:60px;"></textarea></td>
+<td><span class="bold">To:</span><br><textarea id="client" style="height:60px;"></textarea></td>
+</tr>
+</table>
+
+<br>
+
+<table>
+<colgroup>
+<col style="width:6%">
+<col style="width:44%">
+<col style="width:10%">
+<col style="width:12%">
+<col style="width:8%">
+<col style="width:20%">
+</colgroup>
+<thead>
+<tr>
+<th>S.No</th>
+<th>Description of Goods / Services</th>
+<th>Qty</th>
+<th>Unit Rate</th>
+<th>GST %</th>
+<th>Amount</th>
+</tr>
+</thead>
+<tbody id="itemsBody"></tbody>
+</table>
+
+<button onclick="addItem()">Add Item</button>
+<button onclick="window.print()">Print</button>
+
+<table class="summary">
+<tr>
+<td class="bold">Subtotal</td>
+<td id="subtotal">0.00</td>
+</tr>
+<tr>
+<td class="bold">Total GST</td>
+<td id="totalGst">0.00</td>
+</tr>
+<tr>
+<td class="bold">Grand Total</td>
+<td id="grandTotal">0.00</td>
+</tr>
+</table>
+
+<div class="clear"></div>
+
+<p class="bold">Amount in Words:</p>
+<p id="amountWords">Zero Rupees Only</p>
+
+<div class="signature-section">
+<div class="sign-box">
+<div style="border-top:1px solid #000;margin-top:60px"></div>
+Authorized Signature
+</div>
+<div class="sign-box">
+<div class="stamp-box"></div>
+Company Stamp
+</div>
+</div>
+
+</div>
+
+<script>
+let items=[];
+function el(id){return document.getElementById(id)}
+function fmt(n){return Number(n||0).toFixed(2)}
+
+function addItem(){
+items.push({desc:'',qty:1,rate:0,gst:18});
+render();
+}
+
+function render(){
+let body=el('itemsBody');
+body.innerHTML='';
+items.forEach((it,i)=>{
+let tr=document.createElement('tr');
+tr.innerHTML=`
+<td>${i+1}</td>
+<td><input value="${it.desc}" onchange="items[${i}].desc=this.value"></td>
+<td><input type="number" value="${it.qty}" onchange="items[${i}].qty=this.value;calc()"></td>
+<td><input type="number" value="${it.rate}" onchange="items[${i}].rate=this.value;calc()"></td>
+<td><input type="number" value="${it.gst}" onchange="items[${i}].gst=this.value;calc()"></td>
+<td id="line${i}">0.00</td>`;
+body.appendChild(tr);
+});
+calc();
+}
+
+function numberToWords(num){
+num=Math.floor(num);
+if(num===0) return "Zero Rupees Only";
+const a=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+const b=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+function inWords(n){
+if(n<20) return a[n];
+if(n<100) return b[Math.floor(n/10)]+' '+a[n%10];
+if(n<1000) return a[Math.floor(n/100)]+' Hundred '+inWords(n%100);
+if(n<100000) return inWords(Math.floor(n/1000))+' Thousand '+inWords(n%1000);
+if(n<10000000) return inWords(Math.floor(n/100000))+' Lakh '+inWords(n%100000);
+return inWords(Math.floor(n/10000000))+' Crore '+inWords(n%10000000);
+}
+return inWords(num)+" Rupees Only";
+}
+
+function calc(){
+let subtotal=0,totalGst=0;
+items.forEach((it,i)=>{
+let qty=Number(it.qty)||0;
+let rate=Number(it.rate)||0;
+let gst=Number(it.gst)||0;
+let amount=qty*rate;
+let gstAmt=amount*gst/100;
+subtotal+=amount;
+totalGst+=gstAmt;
+el('line'+i).innerText=fmt(amount+gstAmt);
+});
+let grand=subtotal+totalGst;
+el('subtotal').innerText=fmt(subtotal);
+el('totalGst').innerText=fmt(totalGst);
+el('grandTotal').innerText=fmt(grand);
+el('amountWords').innerText=numberToWords(grand);
+}
+
+if(document.readyState==='loading'){
+document.addEventListener('DOMContentLoaded',addItem);
+}else{addItem();}
+</script>
+</body>
+</html>
