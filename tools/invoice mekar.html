@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>GST Invoice</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+.container {
+  max-width: 800px;
+  margin: auto;
+}
+.editable {
+  background-color: #f9f9f9;
+  border: 1px dashed #ccc;
+  padding: 2px;
+}
+@media print {
+  .editable {
+    background-color: #ffffff !important;
+    border: none !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+table, th, td {
+  border: 1px solid #000;
+}
+th, td {
+  padding: 5px;
+  vertical-align: top;
+}
+th {
+  background-color: #f0f0f0;
+}
+input, select {
+  padding: 2px;
+}
+button {
+  padding: 5px 10px;
+  margin: 5px 0;
+}
+.signature-box {
+  width: 200px;
+  border-top: 1px solid #000;
+  text-align: center;
+  padding-top: 5px;
+  margin-top: 30px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- Header with GSTIN and Invoice No/Date -->
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <div contenteditable="true" id="gstin" class="editable">GSTIN: 07ABCDE1234F1Z5</div>
+    <div>
+      <div><strong>Invoice No:</strong> <span contenteditable="true" id="invoiceNumber" class="editable"></span></div>
+      <div><strong>Date:</strong> <span contenteditable="true" id="invoiceDate" class="editable"></span></div>
+    </div>
+  </div>
+  <!-- Company Name and Address -->
+  <div style="text-align: center; margin-top: 10px;">
+    <h2 contenteditable="true" id="companyName" class="editable">Your Company Name</h2>
+  </div>
+  <div style="text-align: center;">
+    <div contenteditable="true" id="companyAddress" class="editable">
+      Address line 1<br>
+      Address line 2<br>
+      City, State – PIN
+    </div>
+  </div>
+  <hr>
+  <!-- Bill To Party and Work Details -->
+  <table>
+    <tr>
+      <td style="width:50%; vertical-align: top;">
+        <strong>Bill To Party:</strong><br>
+        <div contenteditable="true" id="billToParty" class="editable" style="min-height: 50px;"></div>
+      </td>
+      <td style="width:50%; vertical-align: top;">
+        <strong>Work Details:</strong><br>
+        <div style="margin-bottom: 5px;">
+          <label>Agreement No:</label> <span contenteditable="true" id="agreementNo" class="editable"></span>
+        </div>
+        <div style="margin-bottom: 5px;">
+          <label>Tender No:</label> <span contenteditable="true" id="tenderNo" class="editable"></span>
+        </div>
+        <div style="margin-bottom: 5px;">
+          <label>From Date:</label> <span contenteditable="true" id="fromDate" class="editable"></span>
+        </div>
+        <div>
+          <label>To Date:</label> <span contenteditable="true" id="toDate" class="editable"></span>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <!-- Items Table -->
+  <table id="itemsTable" style="margin-top:10px;">
+    <thead>
+      <tr>
+        <th style="width: 5%;">Sl No</th>
+        <th style="width: 35%;">Description</th>
+        <th style="width: 10%;">HSN/SAC</th>
+        <th style="width: 10%;">Qty</th>
+        <th style="width: 10%;">Unit</th>
+        <th style="width: 15%;">Rate</th>
+        <th style="width: 15%;">Amount</th>
+        <th class="no-print" style="width: 10%;">Action</th>
+      </tr>
+    </thead>
+    <tbody id="itemsBody">
+      <tr>
+        <td class="slNo">1</td>
+        <td><div contenteditable="true" class="editable desc"></div></td>
+        <td><div contenteditable="true" class="editable hsn"></div></td>
+        <td><div contenteditable="true" class="editable qty"></div></td>
+        <td><div contenteditable="true" class="editable unit"></div></td>
+        <td><div contenteditable="true" class="editable rate"></div></td>
+        <td><div class="amount">0.00</div></td>
+        <td class="no-print"><button class="removeRow">Remove</button></td>
+      </tr>
+    </tbody>
+  </table>
+  <button id="addItem" class="no-print">Add Item</button>
+  <!-- Tax Summary -->
+  <table style="margin-top: 10px;">
+    <tr>
+      <td style="text-align: right; width: 70%;"><strong>Taxable Value:</strong></td>
+      <td style="text-align: right;" id="taxableValue">0.00</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">Add: CGST @ 
+        <select id="cgstRate">
+          <option value="0">0%</option>
+  <option value="2.5">2.5%</option>
+  <option value="6">6%</option>
+  <option value="9">9%</option>
+  <option value="14">14%</option>
+        </select>
+      </td>
+      <td style="text-align: right;" id="cgstAmount">0.00</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">Add: SGST @ 
+        <select id="sgstRate">
+          <option value="0">0%</option>
+  <option value="2.5">2.5%</option>
+  <option value="6">6%</option>
+  <option value="9">9%</option>
+  <option value="14">14%</option>
+        </select>
+      </td>
+      <td style="text-align: right;" id="sgstAmount">0.00</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;">Add: IGST @ 
+        <select id="igstRate">
+          <option value="0">0%</option>
+          <option value="5">5%</option>
+          <option value="12">12%</option>
+          <option value="18">18%</option>
+          <option value="28">28%</option>
+        </select>
+      </td>
+      <td style="text-align: right;" id="igstAmount">0.00</td>
+    </tr>
+    <tr>
+      <td style="text-align: right;"><strong>Total (After Tax):</strong></td>
+      <td style="text-align: right;" id="totalAmount">0.00</td>
+    </tr>
+  </table>
+  <p><strong>Total Invoice Amount in Words:</strong> <span id="amountWords"></span></p>
+  <!-- Bank Details and Signature -->
+  <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+    <div style="width: 50%;">
+      <strong>Bank Details:</strong><br>
+      <div contenteditable="true" id="bankDetails" class="editable" style="min-height: 60px;">
+Bank Name:<br>Branch:<br>IFSC:<br>Account No:<br>Account Holder:<br>Bank Address:
+      </div>
+    </div>
+    <div style="width: 40%; text-align: center;">
+      <div class="signature-box">
+        <div contenteditable="true" id="authorizedSign" class="editable">Authorized Signatory</div>
+      </div>
+    </div>
+  </div>
+  <!-- Action Buttons -->
+  <div style="margin-top: 20px;">
+    <button id="saveBtn" class="no-print">Save Invoice</button>
+    <button id="loadBtn" class="no-print">Load Invoice</button>
+    <button id="printBtn" class="no-print">Print</button>
+  </div>
+</div>
+<script>
+// Initialize date and invoice number
+document.getElementById('invoiceDate').textContent = new Date().toLocaleDateString('en-GB');
+document.getElementById('invoiceNumber').textContent = 'INV' + Date.now();
+
+// Recalculate totals and amounts
+function updateTotals() {
+  let taxable = 0;
+  // Iterate each item row
+  document.querySelectorAll('#itemsBody tr').forEach((row, index) => {
+    row.querySelector('.slNo').textContent = index + 1;
+    const qty = parseFloat(row.querySelector('.qty').textContent) || 0;
+    const rate = parseFloat(row.querySelector('.rate').textContent) || 0;
+    const amount = qty * rate;
+    row.querySelector('.amount').textContent = amount.toFixed(2);
+    taxable += amount;
+  });
+  document.getElementById('taxableValue').textContent = taxable.toFixed(2);
+
+  // Read GST rates
+  let cgstRate = parseFloat(document.getElementById('cgstRate').value) || 0;
+  let sgstRate = parseFloat(document.getElementById('sgstRate').value) || 0;
+  let igstRate = parseFloat(document.getElementById('igstRate').value) || 0;
+
+  // If IGST > 0, zero out CGST/SGST
+  if (igstRate > 0) {
+    cgstRate = 0;
+    sgstRate = 0;
+    document.getElementById('cgstRate').value = 0;
+    document.getElementById('sgstRate').value = 0;
+  } else {
+    // Ensure CGST and SGST match each other
+    if (cgstRate > 0) sgstRate = cgstRate;
+    if (sgstRate > 0) cgstRate = sgstRate;
+    document.getElementById('cgstRate').value = cgstRate;
+    document.getElementById('sgstRate').value = sgstRate;
+  }
+
+  // Calculate tax amounts
+  const cgstAmt = taxable * cgstRate / 100;
+  const sgstAmt = taxable * sgstRate / 100;
+  const igstAmt = taxable * igstRate / 100;
+  document.getElementById('cgstAmount').textContent = cgstAmt.toFixed(2);
+  document.getElementById('sgstAmount').textContent = sgstAmt.toFixed(2);
+  document.getElementById('igstAmount').textContent = igstAmt.toFixed(2);
+
+  // Total after tax
+  const total = taxable + cgstAmt + sgstAmt + igstAmt;
+  document.getElementById('totalAmount').textContent = total.toFixed(2);
+
+  // Convert total to words (Indian format)
+  let rupees = Math.floor(total);
+  let paise = Math.round((total - rupees) * 100);
+
+  function price_in_words(price) {
+    const sglDigit = ["Zero","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten",
+                      "Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+    const tensPlace = ["","", "Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+    if (price < 20) return sglDigit[price];
+    if (price < 100) return tensPlace[Math.floor(price/10)] + (price%10 ? " " + sglDigit[price%10] : "");
+    if (price < 1000) return price_in_words(Math.floor(price/100)) + " Hundred" + (price%100 ? " and " + price_in_words(price%100) : "");
+    if (price < 100000) return price_in_words(Math.floor(price/1000)) + " Thousand" + (price%1000 ? " " + price_in_words(price%1000) : "");
+    if (price < 10000000) return price_in_words(Math.floor(price/100000)) + " Lakh" + (price%100000 ? " " + price_in_words(price%100000) : "");
+    return price_in_words(Math.floor(price/10000000)) + " Crore" + (price%10000000 ? " " + price_in_words(price%10000000) : "");
+  }
+
+  let words = "";
+  if (rupees > 0) {
+    words += price_in_words(rupees) + " Rupees";
+  }
+  if (paise > 0) {
+    if (words !== "") words += " and ";
+    words += price_in_words(paise) + " Paise";
+  }
+  if (words === "") words = "Zero";
+  words = "Indian " + words + " Only";
+  document.getElementById('amountWords').textContent = words;
+}
+
+// Add new item row
+document.getElementById('addItem').addEventListener('click', function() {
+  const tbody = document.getElementById('itemsBody');
+  const newRow = document.createElement('tr');
+  newRow.innerHTML = `
+    <td class="slNo"></td>
+    <td><div contenteditable="true" class="editable desc"></div></td>
+    <td><div contenteditable="true" class="editable hsn"></div></td>
+    <td><div contenteditable="true" class="editable qty"></div></td>
+    <td><div contenteditable="true" class="editable unit"></div></td>
+    <td><div contenteditable="true" class="editable rate"></div></td>
+    <td><div class="amount">0.00</div></td>
+    <td class="no-print"><button class="removeRow">Remove</button></td>`;
+  tbody.appendChild(newRow);
+  updateTotals();
+  // Attach remove and input events to the new row
+  newRow.querySelector('.removeRow').addEventListener('click', function() {
+    newRow.remove();
+    updateTotals();
+  });
+  ['qty','rate'].forEach(cls => {
+    newRow.querySelector('.' + cls).addEventListener('input', updateTotals);
+  });
+});
+
+// Remove existing row
+document.querySelectorAll('.removeRow').forEach(btn => {
+  btn.addEventListener('click', function() {
+    this.closest('tr').remove();
+    updateTotals();
+  });
+});
+
+// Recalculate when quantity or rate changes
+document.querySelectorAll('.qty, .rate').forEach(div => {
+  div.addEventListener('input', updateTotals);
+});
+// Recalculate on GST rate change
+document.getElementById('cgstRate').addEventListener('change', updateTotals);
+document.getElementById('sgstRate').addEventListener('change', updateTotals);
+document.getElementById('igstRate').addEventListener('change', updateTotals);
+
+// Save invoice to localStorage
+document.getElementById('saveBtn').addEventListener('click', function() {
+  const invoiceData = {
+    gstin: document.getElementById('gstin').textContent,
+    invoiceNumber: document.getElementById('invoiceNumber').textContent,
+    invoiceDate: document.getElementById('invoiceDate').textContent,
+    companyName: document.getElementById('companyName').textContent,
+    companyAddress: document.getElementById('companyAddress').innerHTML,
+    billToParty: document.getElementById('billToParty').innerHTML,
+    agreementNo: document.getElementById('agreementNo').textContent,
+    tenderNo: document.getElementById('tenderNo').textContent,
+    fromDate: document.getElementById('fromDate').textContent,
+    toDate: document.getElementById('toDate').textContent,
+    items: [],
+    cgstRate: document.getElementById('cgstRate').value,
+    sgstRate: document.getElementById('sgstRate').value,
+    igstRate: document.getElementById('igstRate').value,
+    bankDetails: document.getElementById('bankDetails').innerHTML,
+    authorizedSign: document.getElementById('authorizedSign').textContent
+  };
+  // Save table items
+  document.querySelectorAll('#itemsBody tr').forEach(row => {
+    invoiceData.items.push({
+      desc: row.querySelector('.desc').textContent,
+      hsn: row.querySelector('.hsn').textContent,
+      qty: row.querySelector('.qty').textContent,
+      unit: row.querySelector('.unit').textContent,
+      rate: row.querySelector('.rate').textContent
+    });
+  });
+  // LocalStorage stores strings; use JSON.stringify for the object:contentReference[oaicite:3]{index=3}
+  localStorage.setItem('invoiceData', JSON.stringify(invoiceData));
+  alert('Invoice saved locally.');
+});
+
+// Load invoice from localStorage
+document.getElementById('loadBtn').addEventListener('click', function() {
+  const data = localStorage.getItem('invoiceData');
+  if (!data) { alert('No saved invoice found.'); return; }
+  const invoiceData = JSON.parse(data);
+  document.getElementById('gstin').textContent = invoiceData.gstin;
+  document.getElementById('invoiceNumber').textContent = invoiceData.invoiceNumber;
+  document.getElementById('invoiceDate').textContent = invoiceData.invoiceDate;
+  document.getElementById('companyName').textContent = invoiceData.companyName;
+  document.getElementById('companyAddress').innerHTML = invoiceData.companyAddress;
+  document.getElementById('billToParty').innerHTML = invoiceData.billToParty;
+  document.getElementById('agreementNo').textContent = invoiceData.agreementNo;
+  document.getElementById('tenderNo').textContent = invoiceData.tenderNo;
+  document.getElementById('fromDate').textContent = invoiceData.fromDate;
+  document.getElementById('toDate').textContent = invoiceData.toDate;
+  // Clear and rebuild item rows
+  const tbody = document.getElementById('itemsBody');
+  tbody.innerHTML = '';
+  invoiceData.items.forEach(item => {
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+      <td class="slNo"></td>
+      <td><div contenteditable="true" class="editable desc">${item.desc}</div></td>
+      <td><div contenteditable="true" class="editable hsn">${item.hsn}</div></td>
+      <td><div contenteditable="true" class="editable qty">${item.qty}</div></td>
+      <td><div contenteditable="true" class="editable unit">${item.unit}</div></td>
+      <td><div contenteditable="true" class="editable rate">${item.rate}</div></td>
+      <td><div class="amount">0.00</div></td>
+      <td class="no-print"><button class="removeRow">Remove</button></td>`;
+    tbody.appendChild(newRow);
+    newRow.querySelector('.removeRow').addEventListener('click', function() {
+      newRow.remove();
+      updateTotals();
+    });
+    ['qty','rate'].forEach(cls => {
+      newRow.querySelector('.' + cls).addEventListener('input', updateTotals);
+    });
+  });
+  document.getElementById('cgstRate').value = invoiceData.cgstRate;
+  document.getElementById('sgstRate').value = invoiceData.sgstRate;
+  document.getElementById('igstRate').value = invoiceData.igstRate;
+  document.getElementById('bankDetails').innerHTML = invoiceData.bankDetails;
+  document.getElementById('authorizedSign').textContent = invoiceData.authorizedSign;
+  updateTotals();
+});
+
+// Print the invoice (hides editable styles via CSS)
+document.getElementById('printBtn').addEventListener('click', function() {
+  updateTotals();
+  window.print();
+});
+
+// Initial calculation
+updateTotals();
+</script>
+</body>
+</html>
