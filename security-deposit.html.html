@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Security Deposit Calculator | EMD & Performance Security Tool</title>
+
+<style>
+body{
+font-family: Arial, sans-serif;
+background:#f4f6f9;
+margin:0;
+padding:0;
+}
+
+.container{
+max-width:900px;
+margin:30px auto;
+background:#ffffff;
+padding:25px;
+border-radius:10px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+h1{
+text-align:center;
+color:#1a237e;
+}
+
+.description{
+background:#e8eaf6;
+padding:15px;
+border-left:5px solid #3949ab;
+margin-bottom:20px;
+font-size:15px;
+}
+
+label{
+font-weight:bold;
+display:block;
+margin-top:15px;
+}
+
+input, select{
+width:100%;
+padding:10px;
+margin-top:5px;
+border-radius:5px;
+border:1px solid #ccc;
+}
+
+button{
+margin-top:20px;
+padding:12px;
+width:100%;
+background:#1a237e;
+color:white;
+border:none;
+border-radius:5px;
+font-size:16px;
+cursor:pointer;
+}
+
+button:hover{
+background:#283593;
+}
+
+.result{
+margin-top:20px;
+background:#f1f8e9;
+padding:15px;
+border-radius:5px;
+display:none;
+}
+
+.faq{
+margin-top:40px;
+background:#fafafa;
+padding:20px;
+border-radius:8px;
+border-top:4px solid #3949ab;
+}
+
+.faq h3{
+margin-top:0;
+}
+
+.footer{
+text-align:center;
+margin-top:20px;
+font-size:14px;
+color:#555;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Security Deposit Calculator</h1>
+
+<div class="description">
+<b>Security Deposit Calculator</b> is a simple and accurate tool to calculate 
+<b>Earnest Money Deposit (EMD)</b> and <b>Performance Security / Security Deposit</b> 
+based on tender value. Ideal for government tenders, PWD, CPWD, Railways and other departments.
+</div>
+
+<label>Total Tender Value (₹)</label>
+<input type="number" id="tenderValue" placeholder="Enter total tender amount">
+
+<label>EMD Percentage (%)</label>
+<input type="number" id="emdPercent" placeholder="Example: 2">
+
+<label>Security Deposit Percentage (%)</label>
+<input type="number" id="sdPercent" placeholder="Example: 5">
+
+<button onclick="calculate()">Calculate Deposit</button>
+
+<div class="result" id="resultBox">
+<h3>Calculation Result</h3>
+<p><b>Earnest Money Deposit (EMD):</b> ₹ <span id="emdResult"></span></p>
+<p><b>Security Deposit / Performance Security:</b> ₹ <span id="sdResult"></span></p>
+<p><b>Total Deposit Amount:</b> ₹ <span id="totalResult"></span></p>
+</div>
+
+<div class="faq">
+<h3>Frequently Asked Questions (FAQ)</h3>
+
+<p><b>1. What is EMD?</b><br>
+Earnest Money Deposit (EMD) is a security amount submitted along with the tender bid to ensure seriousness of the bidder.</p>
+
+<p><b>2. What is Security Deposit?</b><br>
+Security Deposit or Performance Security is deposited after tender award to ensure proper execution of work.</p>
+
+<p><b>3. How is EMD calculated?</b><br>
+EMD = (Tender Value × EMD Percentage) ÷ 100</p>
+
+<p><b>4. Can I use this for government tenders?</b><br>
+Yes, this tool works for PWD, CPWD, Railways, Municipal, and other government tenders.</p>
+
+</div>
+
+<div class="footer">
+© 2026 Security Deposit Calculator | Government Tender Tools
+</div>
+
+</div>
+
+<script>
+function calculate(){
+var tenderValue = parseFloat(document.getElementById("tenderValue").value);
+var emdPercent = parseFloat(document.getElementById("emdPercent").value);
+var sdPercent = parseFloat(document.getElementById("sdPercent").value);
+
+if(isNaN(tenderValue) || isNaN(emdPercent) || isNaN(sdPercent)){
+alert("Please enter all values correctly.");
+return;
+}
+
+var emd = (tenderValue * emdPercent) / 100;
+var sd = (tenderValue * sdPercent) / 100;
+var total = emd + sd;
+
+document.getElementById("emdResult").innerHTML = emd.toFixed(2);
+document.getElementById("sdResult").innerHTML = sd.toFixed(2);
+document.getElementById("totalResult").innerHTML = total.toFixed(2);
+
+document.getElementById("resultBox").style.display="block";
+}
+</script>
+
+</body>
+</html>
