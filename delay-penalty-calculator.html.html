@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delay Penalty Calculator | Liquidated Damages (LD)</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f6f9;
+    margin:0;
+    padding:0;
+}
+.container{
+    max-width:900px;
+    margin:40px auto;
+    background:#fff;
+    padding:30px;
+    border-radius:10px;
+    box-shadow:0 0 15px rgba(0,0,0,0.1);
+}
+h1{
+    text-align:center;
+    color:#1a237e;
+}
+.description{
+    background:#eef3ff;
+    padding:15px;
+    border-left:5px solid #1a237e;
+    margin-bottom:25px;
+}
+label{
+    font-weight:bold;
+}
+input, select{
+    width:100%;
+    padding:10px;
+    margin:8px 0 20px 0;
+    border-radius:5px;
+    border:1px solid #ccc;
+}
+button{
+    background:#1a237e;
+    color:white;
+    padding:12px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    width:100%;
+    font-size:16px;
+}
+button:hover{
+    background:#0d1642;
+}
+.result{
+    margin-top:20px;
+    background:#e8f5e9;
+    padding:15px;
+    border-left:5px solid #2e7d32;
+    font-size:18px;
+}
+.print-btn{
+    background:#00695c;
+    margin-top:10px;
+}
+.faq{
+    margin-top:40px;
+}
+.faq h3{
+    background:#1a237e;
+    color:white;
+    padding:10px;
+}
+
+/* PRINT SETTINGS */
+@media print {
+    body{
+        background:white;
+    }
+    .description,
+    .faq,
+    button{
+        display:none !important;
+    }
+    .container{
+        box-shadow:none;
+        margin:0;
+        padding:0;
+    }
+    h1{
+        text-align:left;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Delay Penalty Calculator (Liquidated Damages)</h1>
+
+<div class="description">
+This tool calculates Liquidated Damages (LD) for delay in project completion as per Government Tender norms.
+</div>
+
+<label>Contract Value (₹)</label>
+<input type="number" id="contractValue" placeholder="Enter total contract amount">
+
+<label>LD Rate (% per Week / Day)</label>
+<input type="number" id="ldRate" placeholder="Example: 0.5">
+
+<label>Delay Duration</label>
+<input type="number" id="delayDuration" placeholder="Enter delay number">
+
+<label>Maximum LD Cap (%)</label>
+<input type="number" id="maxCap" placeholder="Example: 10">
+
+<button onclick="calculateLD()">Calculate Delay Penalty</button>
+<button class="print-btn" onclick="window.print()">Print Report</button>
+
+<div id="result" class="result" style="display:none;"></div>
+
+<div class="faq">
+<h3>Frequently Asked Questions (FAQ)</h3>
+<p><b>1. What is LD?</b><br>LD is penalty charged for delay in project completion.</p>
+<p><b>2. How is LD calculated?</b><br>LD = Contract Value × LD Rate × Delay Duration (subject to max cap).</p>
+<p><b>3. What is max cap?</b><br>Usually 5%–10% of contract value in Govt tenders.</p>
+</div>
+
+</div>
+
+<script>
+function calculateLD(){
+
+let contractValue = parseFloat(document.getElementById("contractValue").value);
+let ldRate = parseFloat(document.getElementById("ldRate").value);
+let delayDuration = parseFloat(document.getElementById("delayDuration").value);
+let maxCap = parseFloat(document.getElementById("maxCap").value);
+
+if(isNaN(contractValue) || isNaN(ldRate) || isNaN(delayDuration) || isNaN(maxCap)){
+    alert("Please fill all fields correctly.");
+    return;
+}
+
+let ldAmount = (contractValue * (ldRate/100)) * delayDuration;
+let maxAllowed = contractValue * (maxCap/100);
+
+if(ldAmount > maxAllowed){
+    ldAmount = maxAllowed;
+}
+
+document.getElementById("result").style.display = "block";
+document.getElementById("result").innerHTML = `
+<b>Delay Penalty Calculation Report</b><br><br>
+Contract Value: ₹ ${contractValue.toLocaleString()} <br>
+Delay Duration: ${delayDuration} <br>
+LD Rate: ${ldRate}% <br>
+Maximum Cap: ${maxCap}% <br><br>
+<b>Total LD Payable: ₹ ${ldAmount.toLocaleString()}</b>
+`;
+}
+</script>
+
+</body>
+</html>
