@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Construction ERP Professional Format</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body{
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background:#f2f4f8;
+    margin:0;
+    padding:20px;
+}
+.container{
+    max-width:1200px;
+    margin:auto;
+    background:#fff;
+    padding:30px;
+    border-radius:8px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.08);
+}
+.header{
+    text-align:center;
+    border-bottom:3px solid #000;
+    padding-bottom:10px;
+    margin-bottom:20px;
+}
+.header h1{
+    margin:0;
+    font-size:26px;
+    letter-spacing:1px;
+}
+.header p{
+    margin:3px 0;
+    font-size:14px;
+}
+.section{
+    margin-top:25px;
+}
+.section h3{
+    border-left:5px solid #1e293b;
+    padding-left:10px;
+    margin-bottom:15px;
+    font-size:18px;
+}
+.form-grid{
+    display:grid;
+    grid-template-columns: repeat(3,1fr);
+    gap:15px;
+}
+input,select{
+    padding:8px;
+    border:1px solid #ccc;
+    border-radius:4px;
+    width:100%;
+    font-size:14px;
+}
+button{
+    padding:8px 16px;
+    border:none;
+    border-radius:4px;
+    background:#1e293b;
+    color:#fff;
+    cursor:pointer;
+    margin-top:10px;
+}
+button:hover{background:#0f172a;}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+table,th,td{
+    border:1px solid #000;
+}
+th{
+    background:#f1f5f9;
+}
+th,td{
+    padding:8px;
+    font-size:14px;
+    text-align:center;
+}
+
+.summary-box{
+    margin-top:20px;
+    border:2px solid #000;
+    padding:15px;
+    background:#fafafa;
+}
+
+.summary-box p{
+    margin:5px 0;
+    font-weight:500;
+}
+
+.signature-area{
+    display:flex;
+    justify-content:space-between;
+    margin-top:50px;
+}
+.signature-box{
+    width:45%;
+    border-top:2px solid #000;
+    text-align:center;
+    padding-top:5px;
+    font-size:14px;
+}
+
+@media print{
+    body{background:#fff;}
+    .container{box-shadow:none;}
+    button{display:none;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header">
+<h1>RUNNING ACCOUNT BILL</h1>
+<p>Government Construction Project</p>
+<p>Professional CA Certified Format</p>
+</div>
+
+<div class="section">
+<h3>Project Information</h3>
+<div class="form-grid">
+<input type="text" id="department" placeholder="Department Name">
+<input type="text" id="project" placeholder="Project Name">
+<input type="number" id="contractValue" placeholder="Total Contract Value">
+</div>
+</div>
+
+<div class="section">
+<h3>Add RA Bill Entry</h3>
+<div class="form-grid">
+<input type="text" id="raNo" placeholder="RA Bill No">
+<input type="number" id="workValue" placeholder="Work Value (Without GST)">
+<select id="gstRate">
+<option value="0">GST 0%</option>
+<option value="5">GST 5%</option>
+<option value="12">GST 12%</option>
+<option value="18">GST 18%</option>
+</select>
+<input type="number" id="deduction" placeholder="Total Deduction %">
+</div>
+<button onclick="addBill()">Add RA Bill</button>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>RA No</th>
+<th>Work Value</th>
+<th>GST</th>
+<th>Gross Amount</th>
+<th>Deduction</th>
+<th>Net Payable</th>
+<th>% Completion</th>
+</tr>
+</thead>
+<tbody id="billTable"></tbody>
+</table>
+
+<div class="summary-box">
+<h3>Ledger Summary</h3>
+<p>Total Work Executed: ₹ <span id="totalWork">0</span></p>
+<p>Total GST: ₹ <span id="totalGST">0</span></p>
+<p>Total Net Paid: ₹ <span id="totalNet">0</span></p>
+<p>Balance Contract Value: ₹ <span id="balance">0</span></p>
+</div>
+
+<div class="signature-area">
+<div class="signature-box">
+Authorized Contractor Signature
+</div>
+<div class="signature-box">
+Engineer / Department Certification
+</div>
+</div>
+
+<br>
+<button onclick="window.print()">Print</button>
+<button onclick="exportPDF()">Export PDF</button>
+
+</div>
+
+<script>
+
+let bills=[];
+let cumulative=0;
+
+function addBill(){
+let ra=document.getElementById("raNo").value;
+let work=parseFloat(document.getElementById("workValue").value)||0;
+let gstRate=parseFloat(document.getElementById("gstRate").value)||0;
+let dedPercent=parseFloat(document.getElementById("deduction").value)||0;
+let contract=parseFloat(document.getElementById("contractValue").value)||0;
+
+let gst=(work*gstRate)/100;
+let gross=work+gst;
+let deduction=(work*dedPercent)/100;
+let net=gross-deduction;
+
+cumulative+=work;
+let percent=(contract>0)?(cumulative/contract)*100:0;
+
+bills.push({ra,work,gst,gross,deduction,net,percent});
+render();
+}
+
+function render(){
+let tbody=document.getElementById("billTable");
+tbody.innerHTML="";
+let totalWork=0,totalGST=0,totalNet=0;
+
+bills.forEach(b=>{
+tbody.innerHTML+=`
+<tr>
+<td>${b.ra}</td>
+<td>${b.work.toFixed(2)}</td>
+<td>${b.gst.toFixed(2)}</td>
+<td>${b.gross.toFixed(2)}</td>
+<td>${b.deduction.toFixed(2)}</td>
+<td>${b.net.toFixed(2)}</td>
+<td>${b.percent.toFixed(2)}%</td>
+</tr>`;
+totalWork+=b.work;
+totalGST+=b.gst;
+totalNet+=b.net;
+});
+
+let contract=parseFloat(document.getElementById("contractValue").value)||0;
+
+document.getElementById("totalWork").innerText=totalWork.toFixed(2);
+document.getElementById("totalGST").innerText=totalGST.toFixed(2);
+document.getElementById("totalNet").innerText=totalNet.toFixed(2);
+document.getElementById("balance").innerText=(contract-totalWork).toFixed(2);
+}
+
+async function exportPDF(){
+const { jsPDF } = window.jspdf;
+let doc=new jsPDF();
+doc.text("Running Account Bill - Professional Format",20,20);
+doc.save("RA_Professional.pdf");
+}
+
+</script>
+
+</body>
+</html>
