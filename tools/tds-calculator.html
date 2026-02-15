@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Government TDS Calculator</title>
+<!-- Load SheetJS for Excel export -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<!-- Load jsPDF for PDF export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f6f9;
+        margin: 0;
+        padding: 0;
+        color: #333;
+    }
+    header {
+        background: #1e3a8a;
+        color: white;
+        padding: 20px;
+        text-align: center;
+    }
+    header h1 {
+        margin: 0;
+        font-size: 28px;
+    }
+    header p {
+        margin: 5px 0 0;
+        font-size: 16px;
+    }
+    .container {
+        max-width: 900px;
+        margin: 30px auto;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    label {
+        display: block;
+        margin: 15px 0 5px;
+        font-weight: bold;
+    }
+    input, select, button {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+    }
+    button {
+        background: #1e3a8a;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+    button:hover {
+        background: #374fc2;
+    }
+    .result {
+        margin-top: 20px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background: #fefefe;
+    }
+    table, th, td {
+        border: 1px solid #333;
+    }
+    th, td {
+        padding: 10px;
+        text-align: right;
+    }
+    th {
+        background: #e0e7ff;
+    }
+    h2 {
+        margin-top: 40px;
+    }
+    details {
+        margin-top: 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        background: #f9fafb;
+    }
+    summary {
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .export-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+    .export-buttons button {
+        width: auto;
+        padding: 10px 20px;
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Government TDS Calculator</h1>
+    <p>Calculate Income Tax TDS & GST TDS for contracts with printable government format.</p>
+</header>
+
+<div class="container">
+    <label for="contractValue">Contract Value (₹)</label>
+    <input type="number" id="contractValue" placeholder="Enter contract value">
+
+    <label for="incomeTDSRate">Income Tax TDS Rate (%)</label>
+    <select id="incomeTDSRate">
+        <option value="1">1%</option>
+        <option value="2">2%</option>
+        <option value="5">5%</option>
+        <option value="10">10%</option>
+        <option value="20">20%</option>
+    </select>
+
+    <label for="gstRate">GST Rate on Contract (%)</label>
+    <select id="gstRate">
+        <option value="0">0%</option>
+        <option value="5">5%</option>
+        <option value="12">12%</option>
+        <option value="18">18%</option>
+        <option value="28">28%</option>
+    </select>
+
+    <label for="gstTDSRate">GST TDS Rate (%)</label>
+    <select id="gstTDSRate">
+        <option value="0.075">0.75%</option>
+        <option value="2">2%</option>
+    </select>
+
+    <button onclick="calculateTDS()">Calculate & Generate Table</button>
+
+    <div class="result" id="result"></div>
+
+    <div class="export-buttons">
+        <button onclick="exportPDF()">Export as PDF</button>
+        <button onclick="exportExcel()">Export as Excel</button>
+    </div>
+
+    <h2>FAQ</h2>
+    <details>
+        <summary>What is TDS?</summary>
+        TDS (Tax Deducted at Source) is a means of collecting income tax in India at the source of income.
+    </details>
+    <details>
+        <summary>What is GST TDS?</summary>
+        GST TDS is applicable on certain specified payments under the GST regime as per Indian law.
+    </details>
+    <details>
+        <summary>How to use this tool?</summary>
+        Enter the contract value, select the applicable Income Tax TDS rate and GST rate, then click "Calculate & Generate Table" to get deductions in official format.
+    </details>
+</div>
+
+<script>
+function calculateTDS() {
+    const contractValue = parseFloat(document.getElementById('contractValue').value) || 0;
+    const incomeTDSRate = parseFloat(document.getElementById('incomeTDSRate').value) || 0;
+    const gstRate = parseFloat(document.getElementById('gstRate').value) || 0;
+    const gstTDSRate = parseFloat(document.getElementById('gstTDSRate').value) || 0;
+
+    // Income Tax TDS
+    const incomeTDS = parseFloat(((contractValue * incomeTDSRate) / 100).toFixed(2));
+
+    // GST Amount
+    const gstAmount = parseFloat(((contractValue * gstRate) / 100).toFixed(2));
+
+    // GST TDS
+    const gstTDS = parseFloat(((gstAmount * gstTDSRate) / 100).toFixed(2));
+
+    const netPayable = parseFloat((contractValue + gstAmount - incomeTDS - gstTDS).toFixed(2));
+
+    const tableHTML = `
+        <table>
+            <tr>
+                <th>Description</th>
+                <th>Amount (₹)</th>
+            </tr>
+            <tr>
+                <td>Contract Value</td>
+                <td>${contractValue.toFixed(2)}</td>
+            </tr>
+            <tr>
+                <td>Income Tax TDS (${incomeTDSRate}%)</td>
+                <td>${incomeTDS.toFixed(2)}</td>
+            </tr>
+            <tr>
+                <td>GST Amount (${gstRate}%)</td>
+                <td>${gstAmount.toFixed(2)}</td>
+            </tr>
+            <tr>
+                <td>GST TDS (${gstTDSRate}%)</td>
+                <td>${gstTDS.toFixed(2)}</td>
+            </tr>
+            <tr>
+                <th>Net Payable Amount</th>
+                <th>${netPayable.toFixed(2)}</th>
+            </tr>
+        </table>
+    `;
+
+    document.getElementById('result').innerHTML = tableHTML;
+}
+
+// PDF Export
+function exportPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text("Government TDS Calculation Sheet", 20, 20);
+
+    const table = document.querySelector("#result table");
+    if (!table) {
+        alert("Please calculate TDS first!");
+        return;
+    }
+
+    const rows = Array.from(table.rows).map(r => Array.from(r.cells).map(c => c.innerText));
+
+    doc.autoTable({
+        head: [rows[0]],
+        body: rows.slice(1),
+        startY: 30
+    });
+
+    doc.save("TDS_Calculation.pdf");
+}
+
+// Excel Export
+function exportExcel() {
+    const table = document.querySelector("#result table");
+    if (!table) {
+        alert("Please calculate TDS first!");
+        return;
+    }
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.table_to_sheet(table);
+    XLSX.utils.book_append_sheet(wb, ws, "TDS Calculation");
+    XLSX.writeFile(wb, "TDS_Calculation.xlsx");
+}
+</script>
+
+<!-- jsPDF autoTable plugin -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+</body>
+</html>
