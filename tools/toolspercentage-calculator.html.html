@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tender Comparison Dashboard</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#eef2f7;
+    margin:0;
+}
+.container{
+    max-width:1300px;
+    margin:20px auto;
+    background:#fff;
+    padding:25px;
+    border-radius:8px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.08);
+}
+h1{
+    text-align:center;
+    color:#1e3c72;
+}
+.short-desc{
+    text-align:center;
+    font-size:14px;
+    color:#555;
+    margin-bottom:20px;
+}
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+}
+.logo{
+    font-weight:bold;
+    color:#1e3c72;
+}
+.dashboard{
+    display:flex;
+    gap:15px;
+    margin-top:20px;
+}
+.card{
+    flex:1;
+    background:#f8fafc;
+    padding:15px;
+    border-radius:6px;
+    text-align:center;
+    box-shadow:0 2px 8px rgba(0,0,0,0.05);
+}
+.card h3{
+    margin:0;
+    font-size:14px;
+    color:#555;
+}
+.card p{
+    font-size:18px;
+    font-weight:bold;
+}
+input,select{
+    padding:6px;
+    margin:5px;
+}
+button{
+    padding:7px 12px;
+    margin:5px;
+    border:none;
+    cursor:pointer;
+    border-radius:4px;
+    font-weight:bold;
+}
+.primary{ background:#1976d2; color:#fff; }
+.success{ background:#2e7d32; color:#fff; }
+.secondary{ background:#e0e0e0; }
+.print{ background:#6d4c41; color:#fff; }
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+th,td{
+    border:1px solid #ccc;
+    padding:8px;
+    text-align:center;
+}
+th{
+    background:#1e3c72;
+    color:#fff;
+}
+.l1{ background:#e8f5e9; font-weight:bold; }
+
+.note{
+    margin-top:20px;
+    padding:15px;
+    background:#f1f8e9;
+    border-left:5px solid #2e7d32;
+}
+
+.faq{
+    margin-top:40px;
+    border-top:2px solid #ddd;
+    padding-top:20px;
+}
+.faq h2{
+    color:#1e3c72;
+}
+.faq-item{
+    margin-bottom:15px;
+    font-size:14px;
+    color:#444;
+}
+
+@media print{
+    button { display:none; }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>Tender Comparison Dashboard</h1>
+
+<div class="short-desc">
+This professional tender comparison tool helps contractors, engineers, and departments 
+analyze multiple bids, calculate GST inclusive/exclusive values, identify L1 bidder automatically, 
+and generate recommendation notes in printable government format.
+</div>
+
+<div class="header">
+<div class="logo" id="deptLogo">Department: PWD</div>
+<button class="print" onclick="window.print()">Export PDF</button>
+</div>
+
+<label>Department:</label>
+<select id="department" onchange="updateLogo()">
+<option>PWD</option>
+<option>CPWD</option>
+<option>Railways</option>
+<option>IOCL</option>
+<option>UPCL</option>
+<option>UPPCL</option>
+<option>Others</option>
+</select>
+
+<label>Estimated Cost:</label>
+<input type="number" id="estimate">
+
+<label>GST Mode:</label>
+<select id="gstMode">
+<option value="inclusive">GST Inclusive</option>
+<option value="exclusive">GST Exclusive</option>
+</select>
+
+<label>GST %:</label>
+<input type="number" id="gstPercent" value="18">
+
+<hr>
+
+<label>Bidder Name:</label>
+<input type="text" id="bidderName">
+
+<label>Bid Amount:</label>
+<input type="number" id="bidAmount">
+
+<button class="primary" onclick="addBid()">Add Bid</button>
+<button class="success" onclick="calculate()">Calculate</button>
+<button class="secondary" onclick="exportExcel()">Excel Export</button>
+
+<div class="dashboard">
+<div class="card">
+<h3>Total Bidders</h3>
+<p id="totalBidders">0</p>
+</div>
+<div class="card">
+<h3>L1 Amount</h3>
+<p id="l1Amount">0</p>
+</div>
+<div class="card">
+<h3>L1 %</h3>
+<p id="l1Percent">0%</p>
+</div>
+</div>
+
+<table id="resultTable">
+<thead>
+<tr>
+<th>Rank</th>
+<th>Bidder</th>
+<th>Final Amount</th>
+<th>% Above/Below</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<div class="note" id="recommendationNote" style="display:none;"></div>
+
+<!-- FAQ SECTION -->
+<div class="faq">
+<h2>Frequently Asked Questions (FAQ)</h2>
+
+<div class="faq-item">
+<strong>1. How is L1 determined?</strong><br>
+L1 is the lowest valid financial bidder after GST adjustment.
+</div>
+
+<div class="faq-item">
+<strong>2. What is GST Inclusive / Exclusive?</strong><br>
+Inclusive means GST already included in bid amount. Exclusive means GST will be added.
+</div>
+
+<div class="faq-item">
+<strong>3. Can this tool generate printable report?</strong><br>
+Yes, use the Export PDF button to save as professional government format.
+</div>
+
+<div class="faq-item">
+<strong>4. Is this suitable for PWD, CPWD, Railways, IOCL, UPCL, UPPCL?</strong><br>
+Yes, department selection is available for structured comparison.
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+let bids=[];
+
+function updateLogo(){
+    document.getElementById("deptLogo").innerText="Department: "+
+    document.getElementById("department").value;
+}
+
+function applyGST(amount){
+    let mode=document.getElementById("gstMode").value;
+    let gst=parseFloat(document.getElementById("gstPercent").value);
+    if(mode==="exclusive"){
+        return amount+(amount*gst/100);
+    }
+    return amount;
+}
+
+function addBid(){
+    let name=document.getElementById("bidderName").value;
+    let amount=parseFloat(document.getElementById("bidAmount").value);
+    if(name===""||isNaN(amount)) return;
+    bids.push({name:name,amount:amount});
+    document.getElementById("bidderName").value="";
+    document.getElementById("bidAmount").value="";
+}
+
+function calculate(){
+    let estimate=parseFloat(document.getElementById("estimate").value);
+    if(isNaN(estimate)||estimate<=0) return;
+
+    estimate=applyGST(estimate);
+    bids.sort((a,b)=>a.amount-b.amount);
+
+    let tbody=document.querySelector("#resultTable tbody");
+    tbody.innerHTML="";
+
+    bids.forEach((bid,index)=>{
+        let finalAmount=applyGST(bid.amount);
+        let percent=((finalAmount-estimate)/estimate)*100;
+
+        let row=tbody.insertRow();
+        row.insertCell(0).innerHTML="L"+(index+1);
+        row.insertCell(1).innerHTML=bid.name;
+        row.insertCell(2).innerHTML=finalAmount.toFixed(2);
+        row.insertCell(3).innerHTML=percent.toFixed(2)+"%";
+
+        if(index===0){
+            row.className="l1";
+            document.getElementById("l1Amount").innerText=finalAmount.toFixed(2);
+            document.getElementById("l1Percent").innerText=percent.toFixed(2)+"%";
+            generateNote(bid.name,finalAmount,percent);
+        }
+    });
+
+    document.getElementById("totalBidders").innerText=bids.length;
+}
+
+function generateNote(name,amount,percent){
+    let dept=document.getElementById("department").value;
+    let note=`As per financial evaluation for ${dept}, L1 bidder is ${name} with quoted amount ₹${amount.toFixed(2)}, which is ${percent.toFixed(2)}% ${percent<0?"below":"above"} the estimated cost. Recommended for approval subject to document verification.`;
+    let box=document.getElementById("recommendationNote");
+    box.style.display="block";
+    box.innerHTML=note;
+}
+
+function exportExcel(){
+    let csv="Rank,Bidder,Final Amount,Percentage\n";
+    document.querySelectorAll("#resultTable tbody tr").forEach(row=>{
+        let cols=row.querySelectorAll("td");
+        let rowData=[];
+        cols.forEach(col=>rowData.push(col.innerText));
+        csv+=rowData.join(",")+"\n";
+    });
+    let blob=new Blob([csv],{type:"text/csv"});
+    let link=document.createElement("a");
+    link.href=URL.createObjectURL(blob);
+    link.download="Tender_Report.csv";
+    link.click();
+}
+
+</script>
+
+</body>
+</html>
