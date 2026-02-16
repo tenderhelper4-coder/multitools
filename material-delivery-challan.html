@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Material / Delivery Challan Generator</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    margin:20px;
+}
+.container{
+    max-width:1100px;
+    margin:auto;
+}
+.header{
+    text-align:center;
+    border-bottom:2px solid #000;
+    padding-bottom:10px;
+}
+.company-name{
+    font-size:24px;
+    font-weight:bold;
+}
+.company-details{
+    font-size:14px;
+}
+.top-section{
+    display:flex;
+    justify-content:space-between;
+    margin-top:15px;
+}
+.to-box{
+    width:60%;
+}
+.right-info{
+    width:35%;
+    text-align:right;
+}
+input, textarea, select{
+    width:100%;
+    padding:5px;
+    margin-top:3px;
+    font-size:14px;
+}
+.mode-toggle{
+    margin-top:10px;
+    font-weight:bold;
+}
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+th, td{
+    border:1px solid #000;
+    padding:8px;
+    text-align:center;
+}
+th{
+    background:#f2f2f2;
+}
+.item-col{
+    width:45%;
+    text-align:left;
+}
+button{
+    padding:8px 15px;
+    margin-top:10px;
+    cursor:pointer;
+}
+.total-section{
+    text-align:right;
+    margin-top:10px;
+    font-size:16px;
+    font-weight:bold;
+}
+.signature{
+    margin-top:60px;
+    display:flex;
+    justify-content:flex-end;
+}
+.signature-box{
+    text-align:center;
+    width:250px;
+}
+@media print{
+    button, .mode-toggle{
+        display:none;
+    }
+    input, textarea{
+        border:none;
+    }
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<!-- COMPANY HEADER -->
+<div class="header">
+<div class="company-name" contenteditable="true">Your Company Name Pvt Ltd</div>
+<div class="company-details" contenteditable="true">
+Address Line 1, City, State - Pincode<br>
+Phone: 0000000000 | Email: example@email.com
+</div>
+</div>
+
+<div class="mode-toggle">
+<label>
+<input type="checkbox" id="deliveryMode" onchange="toggleMode()">
+ Delivery Challan Mode (Without Rate)
+</label>
+</div>
+
+<!-- TO + CHALLAN INFO -->
+<div class="top-section">
+
+<div class="to-box">
+<b>To:</b>
+<textarea rows="4" placeholder="Enter Party / Site Name & Address"></textarea>
+</div>
+
+<div class="right-info">
+Challan No:
+<input type="text"><br>
+Date:
+<input type="date">
+</div>
+
+</div>
+
+<!-- ITEM TABLE -->
+<table id="itemTable">
+<thead>
+<tr>
+<th>Sr No</th>
+<th class="item-col">Description of Material</th>
+<th>Qty</th>
+<th class="rate-col">Rate</th>
+<th class="rate-col">Amount</th>
+</tr>
+</thead>
+<tbody id="tableBody">
+<tr>
+<td>1</td>
+<td><input type="text"></td>
+<td><input type="number" value="0" oninput="calculate(this)"></td>
+<td class="rate-col"><input type="number" value="0" oninput="calculate(this)"></td>
+<td class="rate-col amount">0.00</td>
+</tr>
+</tbody>
+</table>
+
+<button onclick="addRow()">Add Item</button>
+
+<div class="total-section" id="totalSection">
+Grand Total: ₹ <span id="grandTotal">0.00</span>
+</div>
+
+<!-- SIGNATURE -->
+<div class="signature">
+<div class="signature-box">
+_________________________<br>
+<b>Authorized Signature</b>
+</div>
+</div>
+
+<button onclick="window.print()">Print Challan</button>
+
+</div>
+
+<script>
+
+function addRow(){
+    const table = document.getElementById("tableBody");
+    const rowCount = table.rows.length + 1;
+    const row = table.insertRow();
+    row.innerHTML = `
+    <td>${rowCount}</td>
+    <td><input type="text"></td>
+    <td><input type="number" value="0" oninput="calculate(this)"></td>
+    <td class="rate-col"><input type="number" value="0" oninput="calculate(this)"></td>
+    <td class="rate-col amount">0.00</td>
+    `;
+}
+
+function calculate(el){
+    const row = el.parentNode.parentNode;
+    const qty = parseFloat(row.cells[2].children[0].value) || 0;
+    const rateInput = row.querySelector(".rate-col input");
+    let rate = 0;
+    if(rateInput){
+        rate = parseFloat(rateInput.value) || 0;
+    }
+    const amount = qty * rate;
+    const amountCell = row.querySelector(".amount");
+    if(amountCell){
+        amountCell.innerText = amount.toFixed(2);
+    }
+    calculateTotal();
+}
+
+function calculateTotal(){
+    let total = 0;
+    document.querySelectorAll(".amount").forEach(function(el){
+        total += parseFloat(el.innerText) || 0;
+    });
+    document.getElementById("grandTotal").innerText = total.toFixed(2);
+}
+
+function toggleMode(){
+    const isDelivery = document.getElementById("deliveryMode").checked;
+
+    document.querySelectorAll(".rate-col").forEach(function(col){
+        col.style.display = isDelivery ? "none" : "";
+    });
+
+    document.getElementById("totalSection").style.display = isDelivery ? "none" : "";
+}
+
+</script>
+
+</body>
+</html>
