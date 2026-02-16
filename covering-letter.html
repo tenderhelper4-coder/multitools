@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auto Tender Covering Letter - Pro</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f6f9;
+    margin:0;
+    padding:0;
+}
+.container{
+    max-width:1100px;
+    margin:20px auto;
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+h1{
+    text-align:center;
+    color:#0d6efd;
+}
+.description{
+    text-align:center;
+    font-size:14px;
+    color:#555;
+    margin-bottom:20px;
+}
+form{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:15px;
+}
+input, select, textarea{
+    padding:8px;
+    border:1px solid #ccc;
+    border-radius:5px;
+    width:100%;
+}
+textarea{
+    grid-column:1/-1;
+}
+button{
+    padding:10px;
+    border:none;
+    border-radius:5px;
+    background:#0d6efd;
+    color:#fff;
+    cursor:pointer;
+}
+button:hover{
+    background:#084298;
+}
+.btn-group{
+    grid-column:1/-1;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+.output{
+    margin-top:20px;
+    padding:25px;
+    border:1px solid #ccc;
+    background:#fff;
+    white-space:pre-line;
+}
+
+/* PRINT CLEAN */
+@page { margin:20mm; }
+@media print{
+    body *{ visibility:hidden; }
+    .output, .output *{ visibility:visible; }
+    .output{
+        position:absolute;
+        left:0;
+        top:0;
+        width:100%;
+        border:none;
+        padding:0;
+        font-size:16px;
+        line-height:1.6;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Auto Tender Covering Letter - Pro</h1>
+<div class="description">
+Generate professional government-ready covering letters with EMD, Tender Fee & Word Export.
+</div>
+
+<form>
+
+<input type="text" id="companyName" placeholder="Company Name" required>
+<input type="text" id="companyAddress" placeholder="Company Address" required>
+<input type="text" id="authorizedPerson" placeholder="Authorized Signatory Name" required>
+<input type="text" id="designation" placeholder="Designation" required>
+
+<select id="departmentSelect" onchange="setDepartment()">
+<option value="">Select Department</option>
+<option value="Public Works Department (PWD)">PWD</option>
+<option value="Central Public Works Department (CPWD)">CPWD</option>
+<option value="Indian Railways">Railways</option>
+<option value="Military Engineering Services (MES)">MES</option>
+<option value="Indian Oil Corporation Limited (IOCL)">IOCL</option>
+<option value="UPCL">UPCL</option>
+<option value="UPPCL">UPPCL</option>
+<option value="Custom">Custom</option>
+</select>
+
+<input type="text" id="customDepartment" placeholder="Enter Custom Department" style="display:none;">
+
+<input type="text" id="tenderTitle" placeholder="Tender Title" required>
+<input type="text" id="tenderNumber" placeholder="Tender Reference Number" required>
+<input type="date" id="tenderDate" required>
+
+<input type="number" id="bidAmount" placeholder="Quoted Amount (₹)" required>
+<input type="number" id="emdAmount" placeholder="EMD Amount (₹)">
+<input type="number" id="tenderFee" placeholder="Tender Fee (₹)">
+
+<select id="tenderType">
+<option value="Works">Works</option>
+<option value="Supply">Supply</option>
+<option value="Consultancy">Consultancy</option>
+<option value="Service">Service</option>
+</select>
+
+<textarea id="additionalDetails" placeholder="Additional Remarks (Optional)"></textarea>
+
+<div class="btn-group">
+<button type="button" onclick="generateLetter()">Generate Letter</button>
+<button type="button" onclick="window.print()">Print / Save PDF</button>
+<button type="button" onclick="exportWord()">Export Word</button>
+<button type="reset">Reset</button>
+</div>
+
+</form>
+
+<div class="output" id="outputLetter"></div>
+
+</div>
+
+<script>
+
+function formatCurrency(amount){
+    if(!amount) return "";
+    return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR'}).format(amount);
+}
+
+function setDepartment(){
+    let dept = document.getElementById("departmentSelect").value;
+    let custom = document.getElementById("customDepartment");
+    custom.style.display = (dept === "Custom") ? "block" : "none";
+}
+
+function generateLetter(){
+
+    let companyName = document.getElementById('companyName').value;
+    let companyAddress = document.getElementById('companyAddress').value;
+    let authorizedPerson = document.getElementById('authorizedPerson').value;
+    let designation = document.getElementById('designation').value;
+
+    let deptSelect = document.getElementById("departmentSelect").value;
+    let customDept = document.getElementById("customDepartment").value;
+    let departmentName = (deptSelect === "Custom") ? customDept : deptSelect;
+
+    let tenderTitle = document.getElementById('tenderTitle').value;
+    let tenderNumber = document.getElementById('tenderNumber').value;
+    let tenderDate = document.getElementById('tenderDate').value;
+    let bidAmount = document.getElementById('bidAmount').value;
+    let emdAmount = document.getElementById('emdAmount').value;
+    let tenderFee = document.getElementById('tenderFee').value;
+    let tenderType = document.getElementById('tenderType').value;
+    let additionalDetails = document.getElementById('additionalDetails').value;
+
+    if(!companyName || !departmentName || !tenderTitle){
+        alert("Please fill required fields.");
+        return;
+    }
+
+    let emdLine = emdAmount ? 
+    `We have submitted an Earnest Money Deposit (EMD) of ${formatCurrency(emdAmount)} as per tender requirements.` : "";
+
+    let feeLine = tenderFee ? 
+    `The prescribed Tender Fee of ${formatCurrency(tenderFee)} has also been deposited.` : "";
+
+    let letter =
+`Date: ${new Date().toLocaleDateString('en-IN')}
+
+To,
+The Tender Inviting Authority,
+${departmentName}
+
+Subject: Submission of Tender for "${tenderTitle}" (Ref: ${tenderNumber})
+
+Respected Sir/Madam,
+
+We, ${companyName}, having our registered office at ${companyAddress}, hereby submit our bid for the above mentioned ${tenderType} tender dated ${tenderDate}.
+
+We confirm that we have carefully examined all tender documents and agree to execute the work in accordance with the stipulated conditions.
+
+Our quoted bid amount is ${formatCurrency(bidAmount)}.
+
+${emdLine}
+${feeLine}
+
+We assure you of our best services and timely completion as per contractual requirements.
+
+${additionalDetails ? additionalDetails : ""}
+
+Thanking You,
+
+Yours Faithfully,
+
+For ${companyName}
+
+${authorizedPerson}
+${designation}`;
+
+    document.getElementById('outputLetter').innerText = letter;
+}
+
+function exportWord(){
+    let content = document.getElementById("outputLetter").innerText;
+    if(!content){
+        alert("Generate letter first.");
+        return;
+    }
+
+    let blob = new Blob(['\ufeff', content], {
+        type: 'application/msword'
+    });
+
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement("a");
+    a.href = url;
+    a.download = "Tender_Covering_Letter.doc";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+</script>
+
+</body>
+</html>
