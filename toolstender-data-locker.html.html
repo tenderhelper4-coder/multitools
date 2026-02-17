@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tender Data Locker - Advanced Edition</title>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- XLSX Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body{font-family:Segoe UI;margin:0;background:#f4f6f9;}
+header{background:#0b3d91;color:white;padding:15px;text-align:center;font-size:22px;font-weight:bold;}
+.container{width:95%;max-width:1200px;margin:auto;margin-top:20px;}
+.card{background:white;padding:20px;border-radius:8px;box-shadow:0 3px 10px rgba(0,0,0,0.1);margin-bottom:20px;}
+input,select,textarea{width:100%;padding:8px;margin:5px 0;border:1px solid #ccc;border-radius:4px;}
+button{padding:8px 15px;border:none;border-radius:4px;font-weight:600;cursor:pointer;margin:3px;}
+.primary{background:#0b3d91;color:white;}
+.success{background:#198754;color:white;}
+.danger{background:#dc3545;color:white;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th,td{border:1px solid #ddd;padding:8px;text-align:center;}
+th{background:#0b3d91;color:white;}
+.dashboard{display:flex;gap:20px;flex-wrap:wrap;}
+.stat{flex:1;background:#e9f0ff;padding:15px;border-radius:6px;text-align:center;}
+canvas{max-height:300px;}
+@media print{
+button,select,input,textarea{display:none;}
+body{background:white;}
+}
+</style>
+</head>
+
+<body>
+
+<header>📁 Tender Data Locker – Advanced Analytics Edition</header>
+
+<div class="container">
+
+<div class="card dashboard">
+<div class="stat">
+<h3 id="totalCount">0</h3>
+Total Tenders
+</div>
+<div class="stat">
+<h3 id="totalValue">0</h3>
+Total Estimate ₹
+</div>
+</div>
+
+<div class="card">
+<h3>Add Tender</h3>
+<input type="hidden" id="editIndex">
+<input type="text" id="tenderNo" placeholder="Tender No">
+<select id="department">
+<option>PWD</option>
+<option>CPWD</option>
+<option>Railways</option>
+<option>IOCL</option>
+<option>Municipal</option>
+</select>
+<textarea id="workName" placeholder="Work Name"></textarea>
+<input type="number" id="estimate" placeholder="Estimated Value">
+<input type="number" id="emd" placeholder="EMD Amount">
+<input type="date" id="lastDate">
+<button class="primary" onclick="saveTender()">Save Tender</button>
+</div>
+
+<div class="card">
+<h3>Records</h3>
+<button class="success" onclick="exportExcel()">Export Excel</button>
+<button onclick="window.print()">Print Govt Sheet</button>
+<table>
+<thead>
+<tr>
+<th>No</th>
+<th>Dept</th>
+<th>Work</th>
+<th>Estimate</th>
+<th>EMD</th>
+<th>Date</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="table"></tbody>
+</table>
+</div>
+
+<div class="card">
+<h3>📊 Analytics</h3>
+<canvas id="pieChart"></canvas>
+<br><br>
+<canvas id="barChart"></canvas>
+</div>
+
+</div>
+
+<script>
+let tenders = JSON.parse(localStorage.getItem("tender_advanced")) || [];
+
+function saveTender(){
+let data={
+no:tenderNo.value,
+dept:department.value,
+work:workName.value,
+estimate:Number(estimate.value),
+emd:Number(emd.value),
+date:lastDate.value
+};
+
+if(!data.no || !data.work){
+alert("Tender No & Work Name required");
+return;
+}
+
+let edit=editIndex.value;
+if(edit===""){
+tenders.push(data);
+}else{
+tenders[edit]=data;
+editIndex.value="";
+}
+
+localStorage.setItem("tender_advanced",JSON.stringify(tenders));
+clearForm();
+loadTable();
+updateCharts();
+}
+
+function loadTable(){
+let html="";
+let total=0;
+
+tenders.forEach((t,i)=>{
+total+=t.estimate;
+html+=`<tr>
+<td>${t.no}</td>
+<td>${t.dept}</td>
+<td>${t.work}</td>
+<td>₹ ${t.estimate}</td>
+<td>₹ ${t.emd}</td>
+<td>${t.date}</td>
+<td>
+<button onclick="editTender(${i})">Edit</button>
+<button onclick="deleteTender(${i})" class="danger">Delete</button>
+</td>
+</tr>`;
+});
+
+table.innerHTML=html;
+totalCount.innerText=tenders.length;
+totalValue.innerText=total;
+}
+
+function editTender(i){
+let t=tenders[i];
+tenderNo.value=t.no;
+department.value=t.dept;
+workName.value=t.work;
+estimate.value=t.estimate;
+emd.value=t.emd;
+lastDate.value=t.date;
+editIndex.value=i;
+}
+
+function deleteTender(i){
+if(confirm("Delete?")){
+tenders.splice(i,1);
+localStorage.setItem("tender_advanced",JSON.stringify(tenders));
+loadTable();
+updateCharts();
+}
+}
+
+function clearForm(){
+tenderNo.value="";
+workName.value="";
+estimate.value="";
+emd.value="";
+lastDate.value="";
+editIndex.value="";
+}
+
+function exportExcel(){
+let ws = XLSX.utils.json_to_sheet(tenders);
+let wb = XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(wb, ws, "Tender Data");
+XLSX.writeFile(wb, "TenderData.xlsx");
+}
+
+let pieChart, barChart;
+
+function updateCharts(){
+let deptData={};
+tenders.forEach(t=>{
+if(!deptData[t.dept]) deptData[t.dept]=0;
+deptData[t.dept]+=t.estimate;
+});
+
+let labels=Object.keys(deptData);
+let values=Object.values(deptData);
+
+if(pieChart) pieChart.destroy();
+if(barChart) barChart.destroy();
+
+pieChart=new Chart(document.getElementById("pieChart"),{
+type:"pie",
+data:{labels:labels,datasets:[{data:values}]}
+});
+
+barChart=new Chart(document.getElementById("barChart"),{
+type:"bar",
+data:{labels:labels,datasets:[{label:"Total Estimate",data:values}]}
+});
+}
+
+loadTable();
+updateCharts();
+
+</script>
+
+</body>
+</html>
