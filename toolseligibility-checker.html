@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Eligibility Checker Supreme</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Chart JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- html2pdf -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#f4f6f9;
+}
+header{
+background:#0d6efd;
+color:white;
+text-align:center;
+padding:15px;
+}
+.container{
+max-width:950px;
+margin:20px auto;
+background:white;
+padding:20px;
+border-radius:8px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+h2{margin-top:0}
+.form-group{margin-bottom:10px;}
+label{font-weight:bold;}
+input,select{
+width:100%;
+padding:6px;
+margin-top:4px;
+border-radius:4px;
+border:1px solid #ccc;
+}
+button{
+background:#0d6efd;
+color:white;
+border:none;
+padding:8px 14px;
+border-radius:4px;
+margin:5px 5px 5px 0;
+cursor:pointer;
+}
+button:hover{background:#084298;}
+.result{margin-top:15px;padding:10px;border-radius:5px;font-weight:bold;}
+.success{background:#d4edda;color:#155724;}
+.error{background:#f8d7da;color:#721c24;}
+
+.certificate{
+margin-top:20px;
+border:2px solid #000;
+padding:15px;
+display:none;
+}
+
+@media print{
+button{display:none;}
+body{background:white;}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>Eligibility Checker Supreme</h1>
+<p>Government Tender Eligibility Verification System</p>
+</header>
+
+<div class="container" id="printArea">
+
+<h2>Department Selection</h2>
+<div class="form-group">
+<select id="department" onchange="applyTemplate()">
+<option value="custom">Custom</option>
+<option value="pwd">PWD Template</option>
+<option value="cpwd">CPWD Template</option>
+<option value="railways">Railways Template</option>
+</select>
+</div>
+
+<h2>Eligibility Inputs</h2>
+
+<div class="form-group"><label>Your Turnover (₹)</label><input type="number" id="turnover"></div>
+<div class="form-group"><label>Required Turnover (₹)</label><input type="number" id="minTurnover"></div>
+
+<div class="form-group"><label>Your Experience (Years)</label><input type="number" id="experience"></div>
+<div class="form-group"><label>Required Experience (Years)</label><input type="number" id="minExperience"></div>
+
+<div class="form-group"><label>Your Work Value (₹)</label><input type="number" id="workValue"></div>
+<div class="form-group"><label>Required Work Value (₹)</label><input type="number" id="minWorkValue"></div>
+
+<div class="form-group">
+<label>GST Registered?</label>
+<select id="gst"><option value="yes">Yes</option><option value="no">No</option></select>
+</div>
+
+<div class="form-group">
+<label>PAN Available?</label>
+<select id="pan"><option value="yes">Yes</option><option value="no">No</option></select>
+</div>
+
+<button onclick="checkEligibility()">Check Eligibility</button>
+<button onclick="downloadPDF()">Download PDF</button>
+<button onclick="window.print()">Print</button>
+
+<div id="result"></div>
+
+<!-- Chart -->
+<canvas id="scoreChart" height="120"></canvas>
+
+<!-- Certificate Page -->
+<div class="certificate" id="certificate">
+<h2 style="text-align:center;">Eligibility Certificate</h2>
+<p>This is to certify that the bidder has been evaluated based on standard eligibility criteria.</p>
+<p><strong>Final Eligibility Score:</strong> <span id="certScore"></span>%</p>
+<p><strong>Status:</strong> <span id="certStatus"></span></p>
+<p>Date: <span id="certDate"></span></p>
+<p style="margin-top:30px;">Authorized Signatory</p>
+</div>
+
+</div>
+
+<script>
+
+let chartInstance=null;
+let finalScore=0;
+let finalStatus="";
+
+function applyTemplate(){
+let dept=document.getElementById("department").value;
+
+if(dept==="pwd"){
+minTurnover.value=5000000;
+minExperience.value=3;
+minWorkValue.value=3000000;
+}
+else if(dept==="cpwd"){
+minTurnover.value=10000000;
+minExperience.value=5;
+minWorkValue.value=6000000;
+}
+else if(dept==="railways"){
+minTurnover.value=15000000;
+minExperience.value=5;
+minWorkValue.value=8000000;
+}
+}
+
+function checkEligibility(){
+
+let turnover=parseFloat(document.getElementById("turnover").value)||0;
+let minTurnover=parseFloat(document.getElementById("minTurnover").value)||0;
+let experience=parseFloat(document.getElementById("experience").value)||0;
+let minExperience=parseFloat(document.getElementById("minExperience").value)||0;
+let workValue=parseFloat(document.getElementById("workValue").value)||0;
+let minWorkValue=parseFloat(document.getElementById("minWorkValue").value)||0;
+let gst=document.getElementById("gst").value;
+let pan=document.getElementById("pan").value;
+
+let total=5;
+let score=0;
+
+if(turnover>=minTurnover)score++;
+if(experience>=minExperience)score++;
+if(workValue>=minWorkValue)score++;
+if(gst==="yes")score++;
+if(pan==="yes")score++;
+
+finalScore=(score/total)*100;
+
+let result=document.getElementById("result");
+
+if(score===total){
+finalStatus="ELIGIBLE";
+result.className="result success";
+result.innerHTML="✅ ELIGIBLE | Score: "+finalScore+"%";
+}else{
+finalStatus="NOT ELIGIBLE";
+result.className="result error";
+result.innerHTML="❌ NOT ELIGIBLE | Score: "+finalScore+"%";
+}
+
+updateChart(finalScore);
+generateCertificate();
+}
+
+function updateChart(score){
+
+let ctx=document.getElementById("scoreChart");
+
+if(chartInstance)chartInstance.destroy();
+
+chartInstance=new Chart(ctx,{
+type:'bar',
+data:{
+labels:['Eligibility %'],
+datasets:[{
+label:'Score',
+data:[score],
+backgroundColor:'#0d6efd'
+}]
+},
+options:{
+scales:{
+y:{beginAtZero:true,max:100}
+}
+}
+});
+}
+
+function generateCertificate(){
+document.getElementById("certificate").style.display="block";
+document.getElementById("certScore").innerText=finalScore;
+document.getElementById("certStatus").innerText=finalStatus;
+document.getElementById("certDate").innerText=new Date().toLocaleDateString();
+}
+
+function downloadPDF(){
+
+let element=document.getElementById("printArea");
+
+let opt={
+margin:0.3,
+filename:'Eligibility_Certificate.pdf',
+image:{type:'jpeg',quality:0.98},
+html2canvas:{scale:2},
+jsPDF:{unit:'in',format:'a4',orientation:'portrait'}
+};
+
+html2pdf().set(opt).from(element).save();
+}
+
+</script>
+
+</body>
+</html>
