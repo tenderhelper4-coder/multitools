@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Performance Security Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    margin:0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+}
+.container{
+    max-width:1000px;
+    margin:40px auto;
+    background:#fff;
+    padding:30px;
+    border-radius:12px;
+    box-shadow:0 15px 35px rgba(0,0,0,0.25);
+}
+h1{
+    text-align:center;
+    margin-bottom:5px;
+    color:#2c5364;
+}
+.sub{
+    text-align:center;
+    color:#666;
+    margin-bottom:30px;
+    font-size:14px;
+}
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+label{
+    font-weight:600;
+    font-size:14px;
+}
+input,select{
+    width:100%;
+    padding:10px;
+    border-radius:6px;
+    border:1px solid #ccc;
+    margin-top:5px;
+}
+button{
+    padding:12px 18px;
+    border:none;
+    border-radius:6px;
+    font-weight:600;
+    cursor:pointer;
+}
+.primary{
+    background:#2c5364;
+    color:#fff;
+}
+.success{
+    background:#28a745;
+    color:#fff;
+}
+.print{
+    background:#007bff;
+    color:#fff;
+}
+.result-box{
+    margin-top:30px;
+    padding:20px;
+    background:#f4f7f9;
+    border-left:5px solid #2c5364;
+    border-radius:8px;
+}
+.result-box h3{
+    margin-top:0;
+}
+.footer-note{
+    text-align:center;
+    margin-top:25px;
+    font-size:12px;
+    color:#777;
+}
+@media(max-width:768px){
+    .grid{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>🛡️ Performance Security Calculator</h1>
+    <div class="sub">Government Tender / Contract Performance Guarantee Calculation Tool</div>
+
+    <div class="grid">
+        <div>
+            <label>Department</label>
+            <select id="department">
+                <option>PWD</option>
+                <option>CPWD</option>
+                <option>Railways</option>
+                <option>IOCL</option>
+                <option>Municipal Corporation</option>
+                <option>Other</option>
+            </select>
+        </div>
+
+        <div>
+            <label>Contract Amount (₹)</label>
+            <input type="number" id="contractAmount" placeholder="Enter Contract Value">
+        </div>
+
+        <div>
+            <label>Performance Security %</label>
+            <input type="number" id="percentage" placeholder="Example: 5" value="5">
+        </div>
+
+        <div>
+            <label>Additional Security % (If Any)</label>
+            <input type="number" id="additional" placeholder="Optional">
+        </div>
+    </div>
+
+    <br>
+
+    <button class="primary" onclick="calculate()">Calculate Security</button>
+    <button class="success" onclick="exportExcel()">Export Excel</button>
+    <button class="print" onclick="window.print()">Print / Save PDF</button>
+
+    <div class="result-box" id="result" style="display:none;">
+        <h3>Performance Security Summary</h3>
+        <p><strong>Department:</strong> <span id="rDept"></span></p>
+        <p><strong>Contract Amount:</strong> ₹ <span id="rAmount"></span></p>
+        <p><strong>Performance Security:</strong> ₹ <span id="rPS"></span></p>
+        <p><strong>Additional Security:</strong> ₹ <span id="rAdd"></span></p>
+        <hr>
+        <h3>Total Security Required: ₹ <span id="rTotal"></span></h3>
+    </div>
+
+    <div class="footer-note">
+        Professional Tender Finance Tool | Performance Bank Guarantee / FDR / DD Calculation
+    </div>
+</div>
+
+<script>
+function calculate(){
+    let dept = document.getElementById("department").value;
+    let amount = parseFloat(document.getElementById("contractAmount").value);
+    let percent = parseFloat(document.getElementById("percentage").value);
+    let additionalPercent = parseFloat(document.getElementById("additional").value) || 0;
+
+    if(isNaN(amount) || isNaN(percent)){
+        alert("Please enter valid contract amount and percentage.");
+        return;
+    }
+
+    let performanceSecurity = (amount * percent) / 100;
+    let additionalSecurity = (amount * additionalPercent) / 100;
+    let total = performanceSecurity + additionalSecurity;
+
+    document.getElementById("result").style.display = "block";
+    document.getElementById("rDept").innerText = dept;
+    document.getElementById("rAmount").innerText = amount.toLocaleString();
+    document.getElementById("rPS").innerText = performanceSecurity.toLocaleString();
+    document.getElementById("rAdd").innerText = additionalSecurity.toLocaleString();
+    document.getElementById("rTotal").innerText = total.toLocaleString();
+}
+
+function exportExcel(){
+    let dept = document.getElementById("rDept").innerText;
+    let amount = document.getElementById("rAmount").innerText;
+    let ps = document.getElementById("rPS").innerText;
+    let add = document.getElementById("rAdd").innerText;
+    let total = document.getElementById("rTotal").innerText;
+
+    if(!dept){
+        alert("Please calculate first.");
+        return;
+    }
+
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Department,Contract Amount,Performance Security,Additional Security,Total Security\n";
+    csvContent += dept + "," + amount + "," + ps + "," + add + "," + total;
+
+    let encodedUri = encodeURI(csvContent);
+    let link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "Performance_Security_Report.csv");
+    document.body.appendChild(link);
+    link.click();
+}
+</script>
+
+</body>
+</html>
