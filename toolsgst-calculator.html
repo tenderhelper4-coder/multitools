@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>GST Multi Excel + Manual Converter</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body{
+    font-family:Arial;
+    background:linear-gradient(135deg,#1e3c72,#2a5298);
+    margin:0;
+    padding:20px;
+}
+.container{
+    max-width:1100px;
+    margin:auto;
+    background:#fff;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.3);
+}
+h2{text-align:center;}
+.description{
+    background:#f4f6f9;
+    padding:15px;
+    border-radius:8px;
+    margin-bottom:20px;
+    font-size:14px;
+}
+input,select{
+    padding:8px;
+    margin:5px;
+}
+button{
+    padding:8px 12px;
+    border:none;
+    background:#2a5298;
+    color:#fff;
+    border-radius:6px;
+    cursor:pointer;
+    margin:3px;
+}
+button:hover{background:#1e3c72;}
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+table,th,td{border:1px solid #ccc;}
+th,td{padding:8px;text-align:center;}
+.total{
+    margin-top:20px;
+    text-align:right;
+}
+.remove-btn{background:red;}
+
+@media print{
+.description, input, select, button{
+    display:none;
+}
+body{background:#fff;}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h2>GST Multi Amount Converter</h2>
+
+<div class="description">
+Yeh tool multiple amounts par GST calculate karta hai.
+Excel upload ya manual entry dono supported hai.
+</div>
+
+<!-- SINGLE CONTROL SECTION -->
+<div>
+
+<label>GST Rate:</label>
+<select id="gstRate">
+<option value="5">5%</option>
+<option value="12">12%</option>
+<option value="18" selected>18%</option>
+<option value="28">28%</option>
+</select>
+
+<label><input type="radio" name="type" value="exclusive" checked> Exclusive</label>
+<label><input type="radio" name="type" value="inclusive"> Inclusive</label>
+
+<br>
+
+<input type="number" id="manualAmount" placeholder="Enter Amount">
+<button onclick="addManual()">Add</button>
+
+<input type="file" id="excelFile" accept=".xlsx,.xls">
+<button onclick="handleFile()">Upload</button>
+
+<br>
+
+<button onclick="calculateAll()">Calculate</button>
+<button onclick="removeAll()">Remove All</button>
+<button onclick="window.print()">Print</button>
+<button onclick="exportExcel()">Export Excel</button>
+<button onclick="downloadPDF()">Download PDF</button>
+
+</div>
+
+<table id="gstTable">
+<thead>
+<tr>
+<th>Original</th>
+<th>Base</th>
+<th>GST</th>
+<th>Total</th>
+<th>Remove</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<div class="total">
+<p><strong>Total Base:</strong> ₹ <span id="totalBase">0.00</span></p>
+<p><strong>Total GST:</strong> ₹ <span id="totalGST">0.00</span></p>
+<h3>Grand Total: ₹ <span id="grandTotal">0.00</span></h3>
+</div>
+
+</div>
+
+<script>
+
+function addRow(amount){
+    let tbody=document.querySelector("#gstTable tbody");
+    let row=tbody.insertRow();
+    row.insertCell(0).innerText=parseFloat(amount).toFixed(2);
+    row.insertCell(1).innerText="-";
+    row.insertCell(2).innerText="-";
+    row.insertCell(3).innerText="-";
+
+    let btn=document.createElement("button");
+    btn.innerText="X";
+    btn.className="remove-btn";
+    btn.onclick=function(){
+        row.remove();
+        calculateAll();
+    };
+    row.insertCell(4).appendChild(btn);
+}
+
+function addManual(){
+    let amount=parseFloat(document.getElementById("manualAmount").value);
+    if(isNaN(amount)||amount<=0){
+        alert("Enter valid amount");
+        return;
+    }
+    addRow(amount);
+    document.getElementById("manualAmount").value="";
+}
+
+function removeAll(){
+    document.querySelector("#gstTable tbody").innerHTML="";
+    calculateAll();
+}
+
+function handleFile(){
+    const file=document.getElementById('excelFile').files[0];
+    if(!file){ alert("Select Excel file"); return; }
+
+    const reader=new FileReader();
+    reader.onload=function(e){
+        const data=new Uint8Array(e.target.result);
+        const workbook=XLSX.read(data,{type:'array'});
+        const sheet=workbook.Sheets[workbook.SheetNames[0]];
+        const sheetData=XLSX.utils.sheet_to_json(sheet,{header:1});
+
+        sheetData.forEach(row=>{
+            row.forEach(cell=>{
+                if(cell){
+                    let num=parseFloat(cell);
+                    if(!isNaN(num)){
+                        addRow(num);
+                    }
+                }
+            });
+        });
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+function calculateAll(){
+    let rate=parseFloat(document.getElementById("gstRate").value);
+    let type=document.querySelector('input[name="type"]:checked').value;
+    let rows=document.querySelectorAll("#gstTable tbody tr");
+
+    let totalBase=0,totalGST=0,grandTotal=0;
+
+    rows.forEach(row=>{
+        let original=parseFloat(row.cells[0].innerText);
+        let base,gst,total;
+
+        if(type==="exclusive"){
+            base=original;
+            gst=(base*rate)/100;
+            total=base+gst;
+        }else{
+            total=original;
+            base=total/(1+rate/100);
+            gst=total-base;
+        }
+
+        row.cells[1].innerText=base.toFixed(2);
+        row.cells[2].innerText=gst.toFixed(2);
+        row.cells[3].innerText=total.toFixed(2);
+
+        totalBase+=base;
+        totalGST+=gst;
+        grandTotal+=total;
+    });
+
+    document.getElementById("totalBase").innerText=totalBase.toFixed(2);
+    document.getElementById("totalGST").innerText=totalGST.toFixed(2);
+    document.getElementById("grandTotal").innerText=grandTotal.toFixed(2);
+}
+
+function exportExcel(){
+    let table=document.getElementById("gstTable");
+    let wb=XLSX.utils.table_to_book(table,{sheet:"GST Report"});
+    XLSX.writeFile(wb,"GST_Report.xlsx");
+}
+
+function downloadPDF(){
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFontSize(16);
+    doc.text("GST Report", 14, 15);
+
+    let y=25;
+    let rows=document.querySelectorAll("#gstTable tbody tr");
+
+    doc.setFontSize(10);
+    doc.text("Original | Base | GST | Total", 14, y);
+    y+=8;
+
+    rows.forEach(row=>{
+        let o=row.cells[0].innerText;
+        let b=row.cells[1].innerText;
+        let g=row.cells[2].innerText;
+        let t=row.cells[3].innerText;
+        doc.text(`${o} | ${b} | ${g} | ${t}`,14,y);
+        y+=8;
+    });
+
+    y+=5;
+    doc.text("Total Base: "+document.getElementById("totalBase").innerText,14,y);
+    y+=8;
+    doc.text("Total GST: "+document.getElementById("totalGST").innerText,14,y);
+    y+=8;
+    doc.text("Grand Total: "+document.getElementById("grandTotal").innerText,14,y);
+
+    doc.save("GST_Report.pdf");
+}
+
+</script>
+
+</body>
+</html>
