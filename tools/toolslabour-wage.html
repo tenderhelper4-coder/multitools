@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Contractor Payroll System</title>
+
+<style>
+body{
+    font-family:Arial;
+    background:#eef2f7;
+    padding:20px;
+}
+.container{
+    max-width:1100px;
+    background:#fff;
+    margin:auto;
+    padding:25px;
+    border-radius:8px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.1);
+}
+h1{text-align:center;}
+input{
+    padding:6px;
+    margin:4px;
+    width:130px;
+}
+button{
+    padding:8px 15px;
+    background:#0d3b66;
+    color:#fff;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+}
+button:hover{background:#08273f;}
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+table th, table td{
+    border:1px solid #ccc;
+    padding:6px;
+    text-align:center;
+}
+th{
+    background:#0d3b66;
+    color:#fff;
+}
+@media print{
+    button,input{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1>Contractor Payroll System</h1>
+
+<h3>Add Worker</h3>
+
+<input type="text" id="name" placeholder="Worker Name">
+<input type="number" id="rate" placeholder="Daily Rate">
+<input type="number" id="present" placeholder="Present">
+<input type="number" id="half" placeholder="Half">
+<input type="number" id="otHours" placeholder="OT Hours">
+<input type="number" id="otRate" placeholder="OT Rate">
+
+<button onclick="addWorker()">Add Worker</button>
+<button onclick="window.print()">Print Register</button>
+
+<table id="register">
+<thead>
+<tr>
+<th>Name</th>
+<th>Gross</th>
+<th>EPF Emp (12%)</th>
+<th>EPF Empr (12%)</th>
+<th>EPS (8.33%)</th>
+<th>EPF 3.67%</th>
+<th>ESIC Emp (0.75%)</th>
+<th>ESIC Empr (3.25%)</th>
+<th>Net Salary</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+</div>
+
+<script>
+function addWorker(){
+
+let name = document.getElementById("name").value;
+let rate = parseFloat(document.getElementById("rate").value)||0;
+let present = parseFloat(document.getElementById("present").value)||0;
+let half = parseFloat(document.getElementById("half").value)||0;
+let otHours = parseFloat(document.getElementById("otHours").value)||0;
+let otRate = parseFloat(document.getElementById("otRate").value)||0;
+
+/* Attendance */
+let attendancePay = (present*rate)+(half*rate*0.5);
+let overtime = otHours*otRate;
+let gross = attendancePay+overtime;
+
+/* EPF Calculations */
+let epfEmp = gross*0.12;
+let epfEmployer = gross*0.12;
+let eps = gross*0.0833;
+let epfRemain = gross*0.0367;
+
+/* ESIC */
+let esicEmp=0;
+let esicEmployer=0;
+if(gross<=21000){
+    esicEmp=gross*0.0075;
+    esicEmployer=gross*0.0325;
+}
+
+/* Net Salary */
+let net = gross - epfEmp - esicEmp;
+
+/* Add Row */
+let row = `<tr>
+<td>${name}</td>
+<td>${gross.toFixed(2)}</td>
+<td>${epfEmp.toFixed(2)}</td>
+<td>${epfEmployer.toFixed(2)}</td>
+<td>${eps.toFixed(2)}</td>
+<td>${epfRemain.toFixed(2)}</td>
+<td>${esicEmp.toFixed(2)}</td>
+<td>${esicEmployer.toFixed(2)}</td>
+<td>${net.toFixed(2)}</td>
+</tr>`;
+
+document.querySelector("#register tbody").innerHTML += row;
+
+/* Clear Fields */
+document.getElementById("name").value="";
+document.getElementById("rate").value="";
+document.getElementById("present").value="";
+document.getElementById("half").value="";
+document.getElementById("otHours").value="";
+document.getElementById("otRate").value="";
+}
+</script>
+
+</body>
+</html>
