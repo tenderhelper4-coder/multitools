@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EMD Calculator Pro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body{
+    margin:0;
+    font-family:Segoe UI;
+    background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    display:flex;
+    justify-content:center;
+    padding:20px;
+}
+.container{
+    background:#fff;
+    width:100%;
+    max-width:950px;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+}
+h1{
+    text-align:center;
+    color:#203a43;
+}
+.section{
+    margin-bottom:15px;
+}
+label{
+    font-weight:600;
+    display:block;
+    margin-bottom:5px;
+}
+input,select{
+    width:100%;
+    padding:8px;
+    border-radius:6px;
+    border:1px solid #ccc;
+}
+.row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+}
+button{
+    padding:10px;
+    margin-top:10px;
+    border:none;
+    border-radius:6px;
+    background:#203a43;
+    color:#fff;
+    cursor:pointer;
+}
+button:hover{
+    background:#162d35;
+}
+.result{
+    background:#f4f8fb;
+    padding:15px;
+    margin-top:15px;
+    border-left:5px solid #203a43;
+}
+.description{
+    margin-top:20px;
+    padding:15px;
+    background:#eef3f7;
+    border-radius:8px;
+    font-size:14px;
+    color:#333;
+    line-height:1.6;
+}
+canvas{
+    margin-top:15px;
+}
+@media print{
+    button,canvas{
+        display:none;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>EMD Calculator - Pro Version</h1>
+
+<div class="row section">
+<div>
+<label>Tender No.</label>
+<input type="text" id="tenderNo">
+</div>
+<div>
+<label>Department</label>
+<select id="department">
+<option>PWD</option>
+<option>CPWD</option>
+<option>Railways</option>
+<option>IOCL</option>
+<option>NHIDCL</option>
+<option>Other</option>
+</select>
+</div>
+</div>
+
+<div class="row section">
+<div>
+<label>Bidder Name</label>
+<input type="text" id="bidder">
+</div>
+<div>
+<label>Tender Amount (₹)</label>
+<input type="number" id="amount">
+</div>
+</div>
+
+<div class="row section">
+<div>
+<label>EMD Percentage (%)</label>
+<input type="number" id="percent" value="2">
+</div>
+<div>
+<label>EMD Exemption</label>
+<select id="exemption">
+<option value="No">No</option>
+<option value="MSME">MSME</option>
+<option value="NSIC">NSIC</option>
+</select>
+</div>
+</div>
+
+<button onclick="calculate()">Calculate</button>
+<button onclick="exportExcel()">Export Excel</button>
+<button onclick="generatePDF()">Download PDF</button>
+<button onclick="window.print()">Print</button>
+
+<div class="result" id="result" style="display:none;">
+<h3>EMD Calculation Result</h3>
+<p><strong>Tender No:</strong> <span id="rTender"></span></p>
+<p><strong>Department:</strong> <span id="rDept"></span></p>
+<p><strong>Bidder:</strong> <span id="rBidder"></span></p>
+<p><strong>Tender Amount:</strong> ₹ <span id="rAmount"></span></p>
+<p><strong>EMD %:</strong> <span id="rPercent"></span>%</p>
+<p><strong>Exemption:</strong> <span id="rExempt"></span></p>
+<hr>
+<h2>EMD Payable: ₹ <span id="rEMD"></span></h2>
+</div>
+
+<canvas id="emdChart"></canvas>
+
+<!-- Description Section -->
+<div class="description">
+<b>About This Tool:</b><br><br>
+EMD Calculator – Pro Version is a professional tender utility tool designed to calculate 
+Earnest Money Deposit (EMD) accurately for government and private tenders. 
+
+It supports MSME / NSIC exemption options, provides instant calculation with visual chart analysis, 
+and allows export in Excel and Government-format PDF.
+
+This tool works completely offline in a single HTML file and is ideal for contractors, 
+engineers, and tender professionals for fast and error-free EMD preparation.
+</div>
+
+</div>
+
+<script>
+let emdValue = 0;
+let chartInstance = null;
+
+function calculate(){
+let tenderNo=document.getElementById("tenderNo").value;
+let dept=document.getElementById("department").value;
+let bidder=document.getElementById("bidder").value;
+let amount=parseFloat(document.getElementById("amount").value);
+let percent=parseFloat(document.getElementById("percent").value);
+let exemption=document.getElementById("exemption").value;
+
+if(isNaN(amount)||isNaN(percent)){
+alert("Enter valid values");
+return;
+}
+
+if(exemption!="No"){
+emdValue=0;
+}else{
+emdValue=(amount*percent)/100;
+}
+
+document.getElementById("rTender").innerText=tenderNo;
+document.getElementById("rDept").innerText=dept;
+document.getElementById("rBidder").innerText=bidder;
+document.getElementById("rAmount").innerText=amount.toLocaleString('en-IN');
+document.getElementById("rPercent").innerText=percent;
+document.getElementById("rExempt").innerText=exemption;
+document.getElementById("rEMD").innerText=emdValue.toLocaleString('en-IN');
+
+document.getElementById("result").style.display="block";
+
+renderChart(amount,emdValue);
+}
+
+function renderChart(amount,emd){
+if(chartInstance){
+chartInstance.destroy();
+}
+chartInstance=new Chart(document.getElementById("emdChart"),{
+type:'bar',
+data:{
+labels:["Tender Amount","EMD"],
+datasets:[{
+label:"Amount (₹)",
+data:[amount,emd],
+backgroundColor:["#203a43","#2c5364"]
+}]
+}
+});
+}
+
+function exportExcel(){
+let data=[{
+"Tender No":document.getElementById("tenderNo").value,
+"Department":document.getElementById("department").value,
+"Bidder":document.getElementById("bidder").value,
+"Tender Amount":document.getElementById("amount").value,
+"EMD %":document.getElementById("percent").value,
+"Exemption":document.getElementById("exemption").value,
+"EMD Payable":emdValue
+}];
+
+let ws=XLSX.utils.json_to_sheet(data);
+let wb=XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(wb,ws,"EMD Report");
+XLSX.writeFile(wb,"EMD_Report.xlsx");
+}
+
+async function generatePDF(){
+const { jsPDF } = window.jspdf;
+let doc=new jsPDF();
+
+doc.setFontSize(16);
+doc.text("Government Tender EMD Report",20,20);
+
+doc.setFontSize(12);
+doc.text("Tender No: "+document.getElementById("tenderNo").value,20,35);
+doc.text("Department: "+document.getElementById("department").value,20,45);
+doc.text("Bidder: "+document.getElementById("bidder").value,20,55);
+doc.text("Tender Amount: ₹ "+document.getElementById("amount").value,20,65);
+doc.text("EMD %: "+document.getElementById("percent").value+"%",20,75);
+doc.text("Exemption: "+document.getElementById("exemption").value,20,85);
+
+doc.setFontSize(14);
+doc.text("EMD Payable: ₹ "+emdValue,20,100);
+
+doc.save("EMD_Report.pdf");
+}
+</script>
+
+</body>
+</html>
