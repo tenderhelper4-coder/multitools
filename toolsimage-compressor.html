@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<title>Skill Based Wage Calculator – Final</title>
+
+<style>
+body{
+    font-family: Arial;
+    background:#f4f4f4;
+    max-width:850px;
+    margin:auto;
+    padding:20px;
+}
+h2{text-align:center;}
+label{font-weight:bold; margin-top:10px; display:block;}
+input,select,button{
+    width:100%;
+    padding:8px;
+    margin-top:5px;
+}
+button{
+    background:#28a745;
+    color:#fff;
+    border:none;
+    margin-top:15px;
+    cursor:pointer;
+}
+.result{
+    background:#fff;
+    padding:15px;
+    margin-top:20px;
+    border:1px solid #ccc;
+}
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+}
+table,th,td{
+    border:1px solid #999;
+}
+th,td{
+    padding:8px;
+    text-align:right;
+}
+th{
+    text-align:left;
+    background:#f0f0f0;
+}
+.highlight{
+    background:#e8ffe8;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Skill Based Wage Calculator</h2>
+
+<label>Labour Category</label>
+<select id="skillType" onchange="setDefaultWage()">
+    <option value="">-- Select --</option>
+    <option value="unskilled">Unskilled</option>
+    <option value="semiskilled">Semi-Skilled</option>
+    <option value="skilled">Skilled</option>
+</select>
+
+<label>Basic Wage (Per Day ₹)</label>
+<input type="number" id="basic">
+
+<label>HRA (Per Day ₹)</label>
+<input type="number" id="hra" value="0">
+
+<label>Conveyance (Per Day ₹)</label>
+<input type="number" id="conv" value="0">
+
+<label>Bonus (Per Day ₹)</label>
+<input type="number" id="bonus" value="0">
+
+<hr>
+
+<label>Employee PF (%)</label>
+<input type="number" id="epfEmp" value="12">
+
+<label>Employer PF (%)</label>
+<input type="number" id="epfEr" value="13">
+
+<label>Employee ESI (%)</label>
+<input type="number" id="esiEmp" value="0.75">
+
+<label>Employer ESI (%)</label>
+<input type="number" id="esiEr" value="3.25">
+
+<hr>
+
+<label>Calculation Period</label>
+<select id="days">
+    <option value="1">Per Day</option>
+    <option value="7">Weekly (7 Days)</option>
+    <option value="26">Monthly (26 Days)</option>
+    <option value="30">Monthly (30 Days)</option>
+</select>
+
+<button onclick="calculate()">Calculate</button>
+
+<div class="result" id="output"></div>
+
+<script>
+function setDefaultWage(){
+    let skill = document.getElementById("skillType").value;
+    let basic = document.getElementById("basic");
+
+    if(skill==="unskilled") basic.value=700;
+    if(skill==="semiskilled") basic.value=850;
+    if(skill==="skilled") basic.value=1000;
+}
+
+function calculate(){
+
+let days = Number(document.getElementById("days").value);
+
+let basic = Number(document.getElementById("basic").value);
+let hra = Number(document.getElementById("hra").value);
+let conv = Number(document.getElementById("conv").value);
+let bonus = Number(document.getElementById("bonus").value);
+
+if(!basic){ alert("Basic Wage भरें"); return; }
+
+let epfEmp = Number(document.getElementById("epfEmp").value);
+let epfEr = Number(document.getElementById("epfEr").value);
+let esiEmp = Number(document.getElementById("esiEmp").value);
+let esiEr = Number(document.getElementById("esiEr").value);
+
+let dailyGross = basic + hra + conv + bonus;
+let gross = dailyGross * days;
+
+// Employee deductions
+let pfEmp = (basic * epfEmp / 100) * days;
+let esiEmpAmt = (dailyGross * esiEmp / 100) * days;
+
+// Employer contribution
+let pfEr = (basic * epfEr / 100) * days;
+let esiErAmt = (dailyGross * esiEr / 100) * days;
+
+// Net Payments
+let netWithout = gross;
+let netWith = gross - (pfEmp + esiEmpAmt);
+
+// TOTAL PAYMENT (Employer Cost)
+let totalPayment = netWith + pfEr + esiErAmt;
+
+document.getElementById("output").innerHTML = `
+<table>
+<tr>
+    <th>Description</th>
+    <th>Amount (₹)</th>
+</tr>
+<tr>
+    <td>Gross Wage</td>
+    <td>${gross.toFixed(2)}</td>
+</tr>
+<tr>
+    <td>Net Pay (WITHOUT EPF / ESIC)</td>
+    <td>${netWithout.toFixed(2)}</td>
+</tr>
+<tr>
+    <td>PF (Employee)</td>
+    <td>${pfEmp.toFixed(2)}</td>
+</tr>
+<tr>
+    <td>ESI (Employee)</td>
+    <td>${esiEmpAmt.toFixed(2)}</td>
+</tr>
+<tr>
+    <td>Net Pay (WITH EPF / ESIC)</td>
+    <td><b>${netWith.toFixed(2)}</b></td>
+</tr>
+<tr>
+    <td>Employer PF</td>
+    <td>${pfEr.toFixed(2)}</td>
+</tr>
+<tr>
+    <td>Employer ESI</td>
+    <td>${esiErAmt.toFixed(2)}</td>
+</tr>
+<tr class="highlight">
+    <td>TOTAL PAYMENT (Net + EPF + ESIC)</td>
+    <td>${totalPayment.toFixed(2)}</td>
+</tr>
+</table>
+`;
+}
+</script>
+
+</body>
+</html>
